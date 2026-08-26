@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('date');
             $table->foreignId('order_id')->constrained()->restrictOnDelete();
             $table->string('reference')->nullable();
-            $table->string('payment_method'); // PaymentMethod enum: cash | card | ewallet | bank_transfer
+            $table->enum('payment_method', ['card', 'cash', 'gcash', 'gotyme']); // PaymentMethod enum
             $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->timestamps();
         });

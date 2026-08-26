@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('name');
-            $table->string('type'); // DiscountType enum: percentage | amount
+            $table->enum('type', ['percentage', 'amount']); // DiscountType enum
             $table->decimal('value', 10, 2);
             $table->timestamps();
         });

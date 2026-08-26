@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('tin')->nullable();
             $table->text('address')->nullable();
             $table->string('contact_number')->nullable();
-            $table->string('payment_method')->nullable(); // PaymentMethod enum: cash | card | gcash | gotyme
+            $table->enum('payment_method', ['card', 'cash', 'gcash', 'gotyme'])->nullable(); // PaymentMethod enum
             $table->timestamps();
         });
     }
