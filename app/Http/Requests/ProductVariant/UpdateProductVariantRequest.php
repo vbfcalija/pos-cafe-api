@@ -11,8 +11,8 @@ class UpdateProductVariantRequest extends FormRequest
         return [
             'product_uuid' => ['sometimes', 'required', 'exists:products,uuid'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'price' => ['sometimes', 'required', 'integer', 'min:0'],
-            'cost' => ['sometimes', 'required', 'integer', 'min:0'],
+            'price' => ['sometimes', 'required', 'numeric', 'min:0'],
+            'cost' => ['sometimes', 'required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

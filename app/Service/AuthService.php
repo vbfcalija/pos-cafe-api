@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Interface\Repository\UserRepositoryInterface;
 use App\Interface\Service\AuthServiceInterface;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthService implements AuthServiceInterface
@@ -45,12 +46,20 @@ class AuthService implements AuthServiceInterface
 
     public function register(object $payload)
     {
-        $user = $this->userRepository->create($payload);
+        // Both writes (the user row, the token row) succeed together or not
+        // at all — without this, a token-creation failure would leave a
+        // committed user row behind for a request the client saw fail,
+        // which then silently succeeds if they retry register with the
+        // same email (a confusing "duplicate email" error on a request
+        // they believe never went through).
+        $data = DB::transaction(function () use ($payload) {
+            $user = $this->userRepository->create($payload);
 
-        $data = (object) [
-            'token' => $user->createToken('pos-cafe-api')->plainTextToken,
-            'user' => new UserResource($user),
-        ];
+            return (object) [
+                'token' => $user->createToken('pos-cafe-api')->plainTextToken,
+                'user' => new UserResource($user),
+            ];
+        });
 
         return response()->json(['data' => $data], Response::HTTP_CREATED);
     }

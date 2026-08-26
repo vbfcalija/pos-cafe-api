@@ -16,7 +16,7 @@ class StoreOrderRequest extends FormRequest
             'customer_uuid' => ['nullable', 'exists:customers,uuid'],
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.product_variant_uuid' => ['required', 'exists:product_variants,uuid'],
-            'lines.*.qty' => ['required', 'integer', 'min:1'],
+            'lines.*.quantity' => ['required', 'integer', 'min:1'],
             'lines.*.discount_uuid' => ['nullable', 'exists:discounts,uuid'],
             'payments' => ['required', 'array', 'min:1'],
             'payments.*.payment_method' => ['required', Rule::enum(PaymentMethod::class)],

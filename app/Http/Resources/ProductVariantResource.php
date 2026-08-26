@@ -12,8 +12,8 @@ class ProductVariantResource extends JsonResource
         return [
             'uuid' => $this->uuid,
             'name' => $this->name,
-            'price' => $this->price,
-            'cost' => $this->cost,
+            'price' => (float) $this->price,
+            'cost' => (float) $this->cost,
             'is_active' => $this->is_active,
             'product' => new ProductResource($this->whenLoaded('product')),
         ];

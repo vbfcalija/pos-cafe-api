@@ -11,9 +11,9 @@ class OrderDetailResource extends JsonResource
     {
         return [
             'uuid' => $this->uuid,
-            'qty' => $this->qty,
-            'price' => $this->price,
-            'cost' => $this->cost,
+            'quantity' => $this->quantity,
+            'price' => (float) $this->price,
+            'cost' => (float) $this->cost,
             'tax_percentage' => (float) $this->tax_percentage,
             'product_variant' => new ProductVariantResource($this->whenLoaded('productVariant')),
             'discount' => new DiscountResource($this->whenLoaded('discount')),

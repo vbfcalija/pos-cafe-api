@@ -10,7 +10,7 @@ class UpdateBranchRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'address' => ['sometimes', 'required', 'string', 'max:255'],
+            'address' => ['sometimes', 'required', 'string'],
             'phone' => ['nullable', 'string', 'max:50'],
             'alternate_phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],

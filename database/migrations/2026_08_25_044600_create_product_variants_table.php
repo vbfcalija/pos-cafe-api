@@ -16,8 +16,8 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
             $table->string('name');
-            $table->unsignedBigInteger('price');
-            $table->unsignedBigInteger('cost');
+            $table->decimal('price', 18, 2)->unsigned();
+            $table->decimal('cost', 18, 2)->unsigned();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -17,7 +17,7 @@ class OrderDetail extends Model
         'uuid',
         'order_id',
         'product_variant_id',
-        'qty',
+        'quantity',
         'price',
         'cost',
         'tax_percentage',
@@ -25,6 +25,8 @@ class OrderDetail extends Model
     ];
 
     protected $casts = [
+        'price' => 'decimal:2',
+        'cost' => 'decimal:2',
         'tax_percentage' => 'decimal:2',
     ];
 

@@ -24,6 +24,11 @@ class Product extends Model
         'tax_rate_id',
     ];
 
+    protected $casts = [
+        'price' => 'decimal:2',
+        'cost' => 'decimal:2',
+    ];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

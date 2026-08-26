@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('sku')->unique();
             $table->string('barcode')->nullable()->unique();
             $table->string('name');
-            $table->unsignedBigInteger('price');
-            $table->unsignedBigInteger('cost');
+            $table->decimal('price', 18, 2)->unsigned();
+            $table->decimal('cost', 18, 2)->unsigned();
             $table->string('color')->nullable();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
             $table->foreignId('tax_rate_id')->constrained('tax_rate')->restrictOnDelete();

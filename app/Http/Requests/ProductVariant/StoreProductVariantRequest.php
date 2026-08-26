@@ -11,8 +11,8 @@ class StoreProductVariantRequest extends FormRequest
         return [
             'product_uuid' => ['required', 'exists:products,uuid'],
             'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'integer', 'min:0'],
-            'cost' => ['required', 'integer', 'min:0'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'cost' => ['required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

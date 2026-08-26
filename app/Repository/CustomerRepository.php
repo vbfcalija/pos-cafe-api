@@ -25,6 +25,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer->tin = $payload->tin ?? null;
         $customer->address = $payload->address ?? null;
         $customer->contact_number = $payload->contact_number ?? null;
+        $customer->payment_method = $payload->payment_method ?? null;
         $customer->save();
 
         return $customer->fresh();
@@ -37,6 +38,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer->tin = $payload->tin ?? $customer->tin;
         $customer->address = $payload->address ?? $customer->address;
         $customer->contact_number = $payload->contact_number ?? $customer->contact_number;
+        $customer->payment_method = $payload->payment_method ?? $customer->payment_method;
         $customer->save();
 
         return $customer->fresh();

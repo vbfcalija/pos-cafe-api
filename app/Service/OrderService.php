@@ -40,7 +40,7 @@ class OrderService implements OrderServiceInterface
 
                 $this->orderRepository->addLine($order, [
                     'product_variant_id' => $variant->id,
-                    'qty' => $line['qty'],
+                    'quantity' => $line['quantity'],
                     'price' => $variant->price,
                     'cost' => $variant->cost,
                     'tax_percentage' => $variant->product->taxRate->percentage,

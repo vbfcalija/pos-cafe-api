@@ -12,8 +12,9 @@ class ProductSeeder extends Seeder
     /**
      * Each drink is one Product; every drink gets four ProductVariants —
      * Iced/Hot crossed with 8oz/12oz. Each variant gets its own random price
-     * between ₱100–249 (stored as centavos); cost is derived as a fixed
-     * margin off that price rather than randomized separately.
+     * between ₱100–249 (stored as a decimal(18,2) peso amount, e.g. 123.00);
+     * cost is derived as a fixed margin off that price rather than
+     * randomized separately.
      *
      * Categories group by drink family, not by temperature — Iced/Hot is
      * already a variant-level distinction on every drink here, so it can't
@@ -93,13 +94,12 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * @return array{0: int, 1: int} [priceInCentavos, costInCentavos]
+     * @return array{0: float, 1: float} [pricePesos, costPesos]
      */
     private function randomPriceAndCost(): array
     {
-        $pricePesos = rand(self::MIN_PRICE_PESOS, self::MAX_PRICE_PESOS);
-        $price = $pricePesos * 100;
-        $cost = (int) round($price * self::COST_MARGIN);
+        $price = (float) rand(self::MIN_PRICE_PESOS, self::MAX_PRICE_PESOS);
+        $cost = round($price * self::COST_MARGIN, 2);
 
         return [$price, $cost];
     }

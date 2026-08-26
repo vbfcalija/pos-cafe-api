@@ -16,8 +16,9 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('tin')->nullable();
-            $table->string('address')->nullable();
+            $table->text('address')->nullable();
             $table->string('contact_number')->nullable();
+            $table->string('payment_method')->nullable(); // PaymentMethod enum: cash | card | gcash | gotyme
             $table->timestamps();
         });
     }
