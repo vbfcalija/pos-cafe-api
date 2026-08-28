@@ -9,7 +9,8 @@ class BranchRepository implements BranchRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return Branch::orderBy($sortField, $sortOrder)
+        return Branch::filter($payload->all())
+            ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }
 

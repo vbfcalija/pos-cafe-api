@@ -54,7 +54,7 @@ class ShiftService implements ShiftServiceInterface
         $this->shiftRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Shift deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

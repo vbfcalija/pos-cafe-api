@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\TaxRateController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('auth/logout', [AuthController::class, 'logout']);
@@ -24,6 +25,7 @@ Route::prefix('user')->group(function () {
         'shifts' => ShiftController::class,
         'products' => ProductController::class,
         'product-variants' => ProductVariantController::class,
+        'users' => UserController::class,
     ]);
 
     // Orders are store-only — a recorded sale is never silently edited or

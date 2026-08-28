@@ -15,7 +15,6 @@ class CustomerResource extends JsonResource
             'tin' => $this->tin,
             'address' => $this->address,
             'contact_number' => $this->contact_number,
-            'payment_method' => $this->payment_method,
         ];
     }
 }

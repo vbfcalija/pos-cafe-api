@@ -9,7 +9,8 @@ class TaxRateRepository implements TaxRateRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return TaxRate::orderBy($sortField, $sortOrder)
+        return TaxRate::filter($payload->all())
+            ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }
 

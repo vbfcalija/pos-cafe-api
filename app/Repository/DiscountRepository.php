@@ -9,7 +9,8 @@ class DiscountRepository implements DiscountRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return Discount::orderBy($sortField, $sortOrder)
+        return Discount::filter($payload->all())
+            ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }
 

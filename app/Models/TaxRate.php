@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use App\Traits\UsesUuid;
+use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TaxRate extends Model
 {
-    use HasFactory, UsesUuid;
-
-    protected $table = 'tax_rate';
+    use Filterable, HasFactory, UsesUuid;
 
     protected $fillable = [
         'uuid',

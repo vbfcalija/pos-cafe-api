@@ -16,7 +16,7 @@ class StoreProductRequest extends FormRequest
             'cost' => ['required', 'numeric', 'min:0'],
             'color' => ['nullable', 'string', 'max:50'],
             'category_uuid' => ['required', 'exists:categories,uuid'],
-            'tax_rate_uuid' => ['required', 'exists:tax_rate,uuid'],
+            'tax_rate_uuid' => ['required', 'exists:tax_rates,uuid'],
         ];
     }
 }

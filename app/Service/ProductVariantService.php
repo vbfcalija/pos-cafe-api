@@ -54,7 +54,7 @@ class ProductVariantService implements ProductVariantServiceInterface
         $this->productVariantRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Product variant deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

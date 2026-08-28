@@ -54,7 +54,7 @@ class DiscountService implements DiscountServiceInterface
         $this->discountRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Discount deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

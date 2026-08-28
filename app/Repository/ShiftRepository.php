@@ -9,7 +9,8 @@ class ShiftRepository implements ShiftRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return Shift::with('user')
+        return Shift::filter($payload->all())
+            ->with('user')
             ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }

@@ -54,7 +54,7 @@ class TaxRateService implements TaxRateServiceInterface
         $this->taxRateRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Tax rate deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

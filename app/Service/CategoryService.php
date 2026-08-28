@@ -54,7 +54,7 @@ class CategoryService implements CategoryServiceInterface
         $this->categoryRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Category deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

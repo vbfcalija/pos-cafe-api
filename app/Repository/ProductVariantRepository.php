@@ -10,7 +10,8 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return ProductVariant::with('product')
+        return ProductVariant::filter($payload->all())
+            ->with('product')
             ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }

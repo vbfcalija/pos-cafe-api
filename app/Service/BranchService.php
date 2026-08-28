@@ -54,7 +54,7 @@ class BranchService implements BranchServiceInterface
         $this->branchRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Branch deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

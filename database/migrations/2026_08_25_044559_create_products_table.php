@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('cost', 18, 2)->unsigned();
             $table->string('color')->nullable();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
-            $table->foreignId('tax_rate_id')->constrained('tax_rate')->restrictOnDelete();
+            $table->foreignId('tax_rate_id')->constrained()->restrictOnDelete();
             $table->timestamps();
         });
     }

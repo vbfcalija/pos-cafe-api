@@ -9,7 +9,8 @@ class CategoryRepository implements CategoryRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return Category::orderBy($sortField, $sortOrder)
+        return Category::filter($payload->all())
+            ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }
 

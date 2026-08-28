@@ -54,7 +54,7 @@ class ProductService implements ProductServiceInterface
         $this->productRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Product deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

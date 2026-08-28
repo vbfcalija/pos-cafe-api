@@ -54,7 +54,7 @@ class CustomerService implements CustomerServiceInterface
         $this->customerRepository->delete($uuid);
 
         return response()->json([
-            'message' => 'Customer deleted successfully',
+            'message' => 'Success.',
         ], 200);
     }
 }

@@ -16,7 +16,7 @@ class UpdateProductRequest extends FormRequest
             'cost' => ['sometimes', 'required', 'numeric', 'min:0'],
             'color' => ['nullable', 'string', 'max:50'],
             'category_uuid' => ['sometimes', 'required', 'exists:categories,uuid'],
-            'tax_rate_uuid' => ['sometimes', 'required', 'exists:tax_rate,uuid'],
+            'tax_rate_uuid' => ['sometimes', 'required', 'exists:tax_rates,uuid'],
         ];
     }
 }

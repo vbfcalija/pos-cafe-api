@@ -11,7 +11,8 @@ class ProductRepository implements ProductRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
-        return Product::with(['category', 'taxRate'])
+        return Product::filter($payload->all())
+            ->with(['category', 'taxRate'])
             ->orderBy($sortField, $sortOrder)
             ->paginate(config('services.paginate'));
     }

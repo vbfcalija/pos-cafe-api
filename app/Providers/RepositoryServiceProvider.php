@@ -22,6 +22,7 @@ use App\Interface\Service\ProductServiceInterface;
 use App\Interface\Service\ProductVariantServiceInterface;
 use App\Interface\Service\ShiftServiceInterface;
 use App\Interface\Service\TaxRateServiceInterface;
+use App\Interface\Service\UserServiceInterface;
 use App\Repository\BranchRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\CustomerRepository;
@@ -42,6 +43,7 @@ use App\Service\ProductService;
 use App\Service\ProductVariantService;
 use App\Service\ShiftService;
 use App\Service\TaxRateService;
+use App\Service\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -55,6 +57,7 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
+        $this->app->bind(UserServiceInterface::class, UserService::class);
 
         $this->app->bind(TaxRateRepositoryInterface::class, TaxRateRepository::class);
         $this->app->bind(TaxRateServiceInterface::class, TaxRateService::class);
