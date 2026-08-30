@@ -10,15 +10,17 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
+        $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
+
         return ProductVariant::filter($payload->all())
-            ->with('product')
+            ->with(['product.category', 'product.taxRate'])
             ->orderBy($sortField, $sortOrder)
-            ->paginate(config('services.paginate'));
+            ->paginate($pageLength);
     }
 
     public function findByUuid(string $uuid)
     {
-        return ProductVariant::with('product')->where('uuid', $uuid)->firstOrFail();
+        return ProductVariant::with(['product.category', 'product.taxRate'])->where('uuid', $uuid)->firstOrFail();
     }
 
     public function create(object $payload)

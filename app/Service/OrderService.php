@@ -61,7 +61,7 @@ class OrderService implements OrderServiceInterface
         });
 
         return new OrderResource(
-            $order->load('branch', 'shift', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+            $order->load('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
         );
     }
 }

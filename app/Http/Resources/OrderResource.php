@@ -13,7 +13,6 @@ class OrderResource extends JsonResource
             'uuid' => $this->uuid,
             'order_no' => $this->order_no,
             'date' => $this->date,
-            'branch' => new BranchResource($this->whenLoaded('branch')),
             'shift' => new ShiftResource($this->whenLoaded('shift')),
             'customer' => new CustomerResource($this->whenLoaded('customer')),
             'user' => new UserResource($this->whenLoaded('user')),

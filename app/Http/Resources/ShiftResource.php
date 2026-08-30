@@ -11,10 +11,12 @@ class ShiftResource extends JsonResource
     {
         return [
             'uuid' => $this->uuid,
+            'branch' => new BranchResource($this->whenLoaded('branch')),
             'date' => $this->date,
             'name' => $this->name,
             'starting_cash' => $this->starting_cash,
             'user' => new UserResource($this->whenLoaded('user')),
+            'is_open' => $this->is_open,
         ];
     }
 }

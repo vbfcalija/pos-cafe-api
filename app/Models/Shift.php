@@ -15,15 +15,23 @@ class Shift extends Model
 
     protected $fillable = [
         'uuid',
+        'branch_id',
         'date',
         'name',
         'starting_cash',
         'user_id',
+        'is_open',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'is_open' => 'boolean',
     ];
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function user(): BelongsTo
     {

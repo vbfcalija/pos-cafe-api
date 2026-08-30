@@ -14,7 +14,6 @@ class Order extends Model
 
     protected $fillable = [
         'uuid',
-        'branch_id',
         'shift_id',
         'customer_id',
         'order_no',
@@ -25,11 +24,6 @@ class Order extends Model
     protected $casts = [
         'date' => 'date',
     ];
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
 
     public function shift(): BelongsTo
     {
