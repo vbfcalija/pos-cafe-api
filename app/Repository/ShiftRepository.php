@@ -3,8 +3,8 @@
 namespace App\Repository;
 
 use App\Interface\Repository\ShiftRepositoryInterface;
-use App\Models\Shift;
 use App\Models\Branch;
+use App\Models\Shift;
 
 class ShiftRepository implements ShiftRepositoryInterface
 {

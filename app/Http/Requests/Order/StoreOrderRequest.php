@@ -3,9 +3,7 @@
 namespace App\Http\Requests\Order;
 
 use App\Enums\PaymentMethod;
-use App\Models\Shift;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 use Illuminate\Validation\Rule;
 
 class StoreOrderRequest extends FormRequest
@@ -22,27 +20,6 @@ class StoreOrderRequest extends FormRequest
             'payments' => ['required', 'array', 'min:1'],
             'payments.*.payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'payments.*.reference' => ['nullable', 'string', 'max:255'],
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                $shift = Shift::where('uuid', $this->shift_uuid)->first();
-
-                if (! $shift) {
-                    return;
-                }
-
-                if (! $shift->is_open) {
-                    $validator->errors()->add('shift_uuid', 'An open shift is required before creating an order.');
-                }
-
-                if ($shift->user_id !== $this->user()->id) {
-                    $validator->errors()->add('shift_uuid', 'The selected shift does not belong to the current user.');
-                }
-            },
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Order\StoreOrderRequest;
 use App\Interface\Service\OrderServiceInterface;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -14,8 +15,18 @@ class OrderController extends Controller
         $this->orderService = $orderService;
     }
 
+    public function index(Request $request)
+    {
+        return $this->orderService->findOrders($request);
+    }
+
     public function store(StoreOrderRequest $request)
     {
         return $this->orderService->createOrder($request);
+    }
+
+    public function show(string $uuid)
+    {
+        return $this->orderService->findOrder($uuid);
     }
 }

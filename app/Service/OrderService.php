@@ -7,15 +7,37 @@ use App\Interface\Repository\OrderRepositoryInterface;
 use App\Interface\Service\OrderServiceInterface;
 use App\Models\Discount;
 use App\Models\ProductVariant;
+use App\Models\Shift;
+use App\Traits\SortingTraits;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class OrderService implements OrderServiceInterface
 {
+    use SortingTraits;
+
     private $orderRepository;
 
     public function __construct(OrderRepositoryInterface $orderRepository)
     {
         $this->orderRepository = $orderRepository;
+    }
+
+    public function findOrders(object $payload)
+    {
+        $sortField = $this->sortField($payload, 'date');
+        $sortOrder = $this->sortOrder($payload, 'desc');
+
+        $orders = $this->orderRepository->findMany($payload, $sortField, $sortOrder);
+
+        return OrderResource::collection($orders);
+    }
+
+    public function findOrder(string $uuid)
+    {
+        $order = $this->orderRepository->findByUuid($uuid);
+
+        return new OrderResource($order);
     }
 
     /**
@@ -26,6 +48,20 @@ class OrderService implements OrderServiceInterface
      */
     public function createOrder(object $payload)
     {
+        $shift = Shift::where('uuid', $payload->shift_uuid)->first();
+
+        if ($shift && ! $shift->is_open) {
+            return response()->json([
+                'message' => 'An open shift is required before creating an order.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if ($shift && $shift->user_id !== $payload->user()->id) {
+            return response()->json([
+                'message' => 'The selected shift does not belong to the current user.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $order = DB::transaction(function () use ($payload) {
             $order = $this->orderRepository->create($payload);
 

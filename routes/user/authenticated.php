@@ -28,7 +28,10 @@ Route::prefix('user')->group(function () {
         'users' => UserController::class,
     ]);
 
-    // Orders are store-only — a recorded sale is never silently edited or
-    // deleted. See "Delete vs. deactivate" / the Order section in SKILL.md.
+    // Orders support index/show/store only — no update/destroy. A recorded
+    // sale is never silently edited or deleted. See "Delete vs. deactivate" /
+    // the Order section in SKILL.md.
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::get('orders/{uuid}', [OrderController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
 });

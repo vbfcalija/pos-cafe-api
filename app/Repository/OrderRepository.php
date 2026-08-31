@@ -9,6 +9,23 @@ use App\Models\Shift;
 
 class OrderRepository implements OrderRepositoryInterface
 {
+    public function findMany(object $payload, string $sortField, string $sortOrder)
+    {
+        $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
+
+        return Order::filter($payload->all())
+            ->with('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+            ->orderBy($sortField, $sortOrder)
+            ->paginate($pageLength);
+    }
+
+    public function findByUuid(string $uuid)
+    {
+        return Order::with('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+            ->where('uuid', $uuid)
+            ->firstOrFail();
+    }
+
     public function create(object $payload)
     {
         $order = new Order;
