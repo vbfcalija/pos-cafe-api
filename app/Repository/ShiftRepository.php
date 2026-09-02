@@ -31,6 +31,7 @@ class ShiftRepository implements ShiftRepositoryInterface
         $shift->name = $payload->name;
         $shift->starting_cash = $payload->starting_cash;
         $shift->user_id = $payload->user()->id;
+        $shift->computer_id = $payload->computer_id ?? null;
         $shift->is_open = $payload->is_open ?? true;
         $shift->save();
 

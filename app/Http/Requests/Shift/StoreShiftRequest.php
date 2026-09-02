@@ -13,6 +13,7 @@ class StoreShiftRequest extends FormRequest
             'date' => ['required', 'date'],
             'name' => ['required', 'string', 'max:255'],
             'starting_cash' => ['required', 'integer', 'min:0'],
+            'computer_id' => ['nullable', 'string', 'max:64'],
             'is_open' => ['sometimes', 'boolean'],
         ];
     }

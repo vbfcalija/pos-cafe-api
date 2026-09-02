@@ -16,6 +16,7 @@ class ShiftResource extends JsonResource
             'name' => $this->name,
             'starting_cash' => $this->starting_cash,
             'user' => new UserResource($this->whenLoaded('user')),
+            'computer_id' => $this->computer_id,
             'is_open' => $this->is_open,
         ];
     }

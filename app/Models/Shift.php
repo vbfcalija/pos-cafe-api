@@ -20,6 +20,7 @@ class Shift extends Model
         'name',
         'starting_cash',
         'user_id',
+        'computer_id',
         'is_open',
     ];
 
