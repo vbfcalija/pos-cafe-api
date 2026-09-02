@@ -28,8 +28,6 @@ class ProductRepository implements ProductRepositoryInterface
         $product->sku = $payload->sku;
         $product->barcode = $payload->barcode ?? null;
         $product->name = $payload->name;
-        $product->price = $payload->price;
-        $product->cost = $payload->cost;
         $product->color = $payload->color ?? null;
         $product->category_id = Category::where('uuid', $payload->category_uuid)->firstOrFail()->id;
         $product->tax_rate_id = TaxRate::where('uuid', $payload->tax_rate_uuid)->firstOrFail()->id;
@@ -44,8 +42,6 @@ class ProductRepository implements ProductRepositoryInterface
         $product->sku = $payload->sku ?? $product->sku;
         $product->barcode = $payload->barcode ?? $product->barcode;
         $product->name = $payload->name ?? $product->name;
-        $product->price = $payload->price ?? $product->price;
-        $product->cost = $payload->cost ?? $product->cost;
         $product->color = $payload->color ?? $product->color;
 
         if ($payload->category_uuid) {
