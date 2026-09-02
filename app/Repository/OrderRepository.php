@@ -14,14 +14,14 @@ class OrderRepository implements OrderRepositoryInterface
         $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
 
         return Order::filter($payload->all())
-            ->with('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+            ->with('shift.branch', 'customer', 'user', 'details.productVariant.product.category', 'details.discount', 'payments.user')
             ->orderBy($sortField, $sortOrder)
             ->paginate($pageLength);
     }
 
     public function findByUuid(string $uuid)
     {
-        return Order::with('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+        return Order::with('shift.branch', 'customer', 'user', 'details.productVariant.product.category', 'details.discount', 'payments.user')
             ->where('uuid', $uuid)
             ->firstOrFail();
     }
