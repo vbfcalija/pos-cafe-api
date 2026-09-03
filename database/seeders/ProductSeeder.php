@@ -82,6 +82,51 @@ class ProductSeeder extends Seeder
             'size' => 'Add-on',
             'items' => [
                 'Oatmilk' => 30,
+                'Espresso 1shot' => 30,
+                'Oatside (add-on)' => 30,
+            ],
+        ],
+        'Chips' => [
+            'description' => 'Savory snacks.',
+            'tier' => 'CH',
+            'size' => 'Regular',
+            'items' => [
+                'Cheetos Crunchy' => 219,
+                'Cheetos Jalapeno' => 239,
+                'Doritos Cheese' => 199,
+                'Lays Classic' => 219,
+                'Pringles Cheese Can' => 119,
+                'Pringles Original Can' => 109,
+                'Pringles Sourcream Can' => 109,
+                'Ruffles Original' => 219,
+            ],
+        ],
+        'Pastries' => [
+            'description' => 'Baked goods.',
+            'tier' => 'PS',
+            'size' => 'Regular',
+            'items' => [
+                'Apple Cinnamon Muffin' => 65,
+                'Banana Chocolate Muffin' => 60,
+            ],
+        ],
+        'Others' => [
+            'description' => 'Bottled and canned drinks, and other extras.',
+            'tier' => 'OT',
+            'size' => 'Regular',
+            'items' => [
+                'Agave Syrup 1.02kg' => 600,
+                'Bottle Water' => 20,
+                'Coke Bottle 8oz' => 20,
+                'Coke Zero' => 59,
+                'Oatside Milk Discounted' => 150,
+                'Oatside Milk' => 160,
+                'Papercups (Doublewall) + Lid 16oz' => 15,
+                'Pineapple Juice (canned)' => 59,
+                'Purified Drinking Water (500ml)' => 30,
+                'Sanmig Apple Flavor' => 49,
+                'Sanmig Lemon Flavor' => 49,
+                'Sanmig Light' => 49,
             ],
         ],
     ];
@@ -100,15 +145,6 @@ class ProductSeeder extends Seeder
     private const HOT_PREMIUM_TIER = 'HP';
 
     private const HOT_PREMIUM_DESCRIPTION = 'Premium hot coffee, 8oz or 12oz.';
-
-    /**
-     * On the menu, but nothing on it to sell yet — created so the category
-     * exists ahead of the actual chips/pastries lineup.
-     */
-    private const EMPTY_CATEGORIES = [
-        'Chips' => 'Savory snacks.',
-        'Pastries' => 'Baked goods.',
-    ];
 
     public function run(): void
     {
@@ -150,10 +186,6 @@ class ProductSeeder extends Seeder
                 );
             }
         }
-
-        foreach (self::EMPTY_CATEGORIES as $categoryName => $description) {
-            Category::firstOrCreate(['name' => $categoryName], ['description' => $description]);
-        }
     }
 
     private function createProductWithVariant(
@@ -191,13 +223,18 @@ class ProductSeeder extends Seeder
      * (dropping filler words like "with"), strip vowels from the rest, and
      * tag on a short tier code so the same drink name sold at a different
      * price tier (e.g. "Iced Latte" in both Budget Brew and Iced Premium)
-     * still gets a unique SKU.
+     * still gets a unique SKU. Punctuation (parentheses, "+", ".") in a
+     * name like "Papercups (Doublewall) + Lid 16oz" is stripped first so it
+     * never leaks into the SKU itself.
      */
     private function sku(string $drink, string $tier): string
     {
         $stopWords = ['with', 'and', 'the', 'of', 'in', 'on'];
 
-        $words = collect(preg_split('/\s+/', trim($drink)))
+        $normalized = preg_replace('/[^\p{L}\p{N}\s]/u', '', $drink);
+
+        $words = collect(preg_split('/\s+/', trim($normalized)))
+            ->filter()
             ->reject(fn (string $word) => in_array(strtolower($word), $stopWords, true))
             ->take(3);
 
