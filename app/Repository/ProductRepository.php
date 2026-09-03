@@ -11,10 +11,12 @@ class ProductRepository implements ProductRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
+        $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
+
         return Product::filter($payload->all())
             ->with(['category', 'taxRate'])
             ->orderBy($sortField, $sortOrder)
-            ->paginate(config('services.paginate'));
+            ->paginate($pageLength);
     }
 
     public function findByUuid(string $uuid)

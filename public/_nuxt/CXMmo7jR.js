@@ -1,0 +1,1 @@
+import{t as e}from"./BIsaVz1C.js";function t(){function t(t){return e(t).format(`MMMM DD, Y`)}return{formatDateToReadable:t}}export{t};

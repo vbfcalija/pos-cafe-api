@@ -10,9 +10,11 @@ class UserRepository implements UserRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
+        $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
+
         return User::filter($payload->all())
             ->orderBy($sortField, $sortOrder)
-            ->paginate(config('services.paginate'));
+            ->paginate($pageLength);
     }
 
     public function findByUuid(string $uuid)

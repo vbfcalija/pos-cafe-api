@@ -29,4 +29,9 @@ class OrderController extends Controller
     {
         return $this->orderService->findOrder($uuid);
     }
+
+    public function print(string $uuid)
+    {
+        return $this->orderService->printReceipt($uuid);
+    }
 }

@@ -1,0 +1,1 @@
+import{t as e}from"./D28a4R1i.js";var t=new class extends e{async getOrders(e){return await this.request(`/user/orders`,`GET`,e)}async getOrder(e){return await this.request(`/user/orders/${e}`,`GET`)}async saveOrder(e){return await this.request(`/user/orders`,`POST`,e)}async printReceipt(e){return await this.request(`/user/orders/${e}/print`,`POST`)}};export{t};

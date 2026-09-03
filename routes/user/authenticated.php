@@ -34,4 +34,5 @@ Route::prefix('user')->group(function () {
     Route::get('orders', [OrderController::class, 'index']);
     Route::get('orders/{uuid}', [OrderController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
+    Route::post('orders/{uuid}/print', [OrderController::class, 'print']);
 });

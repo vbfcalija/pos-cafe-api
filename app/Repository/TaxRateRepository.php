@@ -9,9 +9,11 @@ class TaxRateRepository implements TaxRateRepositoryInterface
 {
     public function findMany(object $payload, string $sortField, string $sortOrder)
     {
+        $pageLength = min((int) ($payload->page_length ?? config('services.paginate')), 500);
+
         return TaxRate::filter($payload->all())
             ->orderBy($sortField, $sortOrder)
-            ->paginate(config('services.paginate'));
+            ->paginate($pageLength);
     }
 
     public function findByUuid(string $uuid)

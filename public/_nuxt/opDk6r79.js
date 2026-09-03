@@ -1,0 +1,1 @@
+import{L as e,O as t,k as n,tn as r,tt as i}from"./Br8Uwv_3.js";var a=[`for`],o=Object.assign(e({__name:`Label`,props:{for:{type:String,required:!1},label:{type:String,required:!1}},setup(e){let o=e;return(e,s)=>o.label?(i(),n(`label`,{key:0,for:o.for,class:`text-sm text-gray-600`},r(o.label),9,a)):t(``,!0)}}),{__name:`FormLabel`});export{o as t};

@@ -1,0 +1,1 @@
+import{n as e}from"#entry";function t(){function t(t,n){e({title:t,text:n||`An unknown error occurred.`,type:`error`})}function n(t,n){e({title:t,text:n,type:`success`})}return{errorAlert:t,successAlert:n}}export{t};

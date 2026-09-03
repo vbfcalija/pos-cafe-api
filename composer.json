@@ -7,9 +7,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "blutrixx/nativephp-escpos-printer": "^1.0",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "nativephp/mobile": "^4.3",
         "tucker-eric/eloquentfilter": "^3.6"
     },
     "require-dev": {
