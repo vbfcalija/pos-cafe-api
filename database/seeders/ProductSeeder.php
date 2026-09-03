@@ -81,7 +81,6 @@ class ProductSeeder extends Seeder
             'tier' => 'AO',
             'size' => 'Add-on',
             'items' => [
-                'Oatmilk' => 30,
                 'Espresso 1shot' => 30,
                 'Oatside (add-on)' => 30,
             ],
@@ -235,10 +234,10 @@ class ProductSeeder extends Seeder
 
         $words = collect(preg_split('/\s+/', trim($normalized)))
             ->filter()
-            ->reject(fn (string $word) => in_array(strtolower($word), $stopWords, true))
+            ->reject(fn(string $word) => in_array(strtolower($word), $stopWords, true))
             ->take(3);
 
-        return $words->map(fn (string $word) => $this->abbreviateWord($word))
+        return $words->map(fn(string $word) => $this->abbreviateWord($word))
             ->push($tier)
             ->implode('-');
     }
@@ -249,6 +248,6 @@ class ProductSeeder extends Seeder
         $rest = strtoupper(substr($word, 1));
         $consonants = preg_replace('/[AEIOU]/', '', $rest);
 
-        return $first.$consonants;
+        return $first . $consonants;
     }
 }
