@@ -131,6 +131,36 @@ class OrderService implements OrderServiceInterface
         return response()->json(['message' => 'Success.'], Response::HTTP_OK);
     }
 
+    /**
+     * A refund never deletes or rewrites the original sale. It records the
+     * operator and timestamp so the transaction remains auditable.
+     */
+    public function refundOrder(string $uuid, object $payload)
+    {
+        $order = DB::transaction(function () use ($uuid, $payload) {
+            $order = Order::where('uuid', $uuid)->lockForUpdate()->firstOrFail();
+
+            if ($order->refunded_at) {
+                return null;
+            }
+
+            $order->update([
+                'refunded_at' => now(),
+                'refunded_by_user_id' => $payload->user()->id,
+            ]);
+
+            return $order;
+        });
+
+        if (! $order) {
+            return response()->json([
+                'message' => 'This order has already been refunded.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return new OrderResource($this->orderRepository->findByUuid($uuid));
+    }
+
     private function formatReceipt(Order $order): string
     {
         $branch = $order->shift?->branch;
@@ -164,10 +194,10 @@ class OrderService implements OrderServiceInterface
             $label = $variantName === 'Regular' ? $productName : "{$productName} ({$variantName})";
 
             $lines .= "[L]{$label}\n";
-            $lines .= "[L]{$detail->quantity} x ".number_format((float) $detail->price, 2).'[R]'.number_format($afterDiscount, 2)."\n";
+            $lines .= "[L]{$detail->quantity} x " . number_format((float) $detail->price, 2) . '[R]' . number_format($afterDiscount, 2) . "\n";
 
             if ($discount) {
-                $lines .= "[L]  Discount: {$discount->name}[R]-".number_format($lineGross - $afterDiscount, 2)."\n";
+                $lines .= "[L]  Discount: {$discount->name}[R]-" . number_format($lineGross - $afterDiscount, 2) . "\n";
             }
         }
 
@@ -175,25 +205,25 @@ class OrderService implements OrderServiceInterface
         $paymentMethods = $order->payments->pluck('payment_method.value')->unique()->implode(', ');
 
         return
-            '[C]<b>'.config('app.name')."</b>\n".
-            ($branch ? "[C]{$branch->name}\n" : '').
-            "[C]================================\n".
-            "[L]Order #: {$order->order_no}\n".
-            "[L]Date: {$order->date->format('Y-m-d H:i')}\n".
-            "[L]Cashier: {$order->user->firstname} {$order->user->lastname}\n".
-            ($order->customer ? "[L]Customer: {$order->customer->name}\n" : '').
-            "[C]--------------------------------\n".
-            $lines.
-            "[C]--------------------------------\n".
-            '[L]Subtotal[R]'.number_format($subtotal, 2)."\n".
-            '[L]Discount[R]-'.number_format($discountTotal, 2)."\n".
-            '[L]Tax[R]'.number_format($taxTotal, 2)."\n".
-            '[L]<b>TOTAL[R]'.number_format($grandTotal, 2)."</b>\n".
-            "[C]--------------------------------\n".
-            "[L]Payment: {$paymentMethods}\n".
-            "[C]\n".
-            "[C]<b>Thank you!</b>\n".
-            "[C]Please come again.\n".
+            '[C]<b>' . config('app.name') . "</b>\n" .
+            ($branch ? "[C]{$branch->name}\n" : '') .
+            "[C]================================\n" .
+            "[L]Order #: {$order->order_no}\n" .
+            "[L]Date: {$order->date->format('Y-m-d H:i')}\n" .
+            "[L]Cashier: {$order->user->firstname} {$order->user->lastname}\n" .
+            ($order->customer ? "[L]Customer: {$order->customer->name}\n" : '') .
+            "[C]--------------------------------\n" .
+            $lines .
+            "[C]--------------------------------\n" .
+            '[L]Subtotal[R]' . number_format($subtotal, 2) . "\n" .
+            '[L]Discount[R]-' . number_format($discountTotal, 2) . "\n" .
+            '[L]Tax[R]' . number_format($taxTotal, 2) . "\n" .
+            '[L]<b>TOTAL[R]' . number_format($grandTotal, 2) . "</b>\n" .
+            "[C]--------------------------------\n" .
+            "[L]Payment: {$paymentMethods}\n" .
+            "[C]\n" .
+            "[C]<b>Thank you!</b>\n" .
+            "[C]Please come again.\n" .
             "[C]\n";
     }
 }

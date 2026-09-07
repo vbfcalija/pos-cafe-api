@@ -34,4 +34,9 @@ class OrderController extends Controller
     {
         return $this->orderService->printReceipt($uuid);
     }
+
+    public function refund(Request $request, string $uuid)
+    {
+        return $this->orderService->refundOrder($uuid, $request);
+    }
 }

@@ -11,4 +11,6 @@ interface OrderServiceInterface
     public function createOrder(object $payload);
 
     public function printReceipt(string $uuid);
+
+    public function refundOrder(string $uuid, object $payload);
 }

@@ -20,10 +20,13 @@ class Order extends Model
         'order_no',
         'date',
         'user_id',
+        'refunded_at',
+        'refunded_by_user_id',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'refunded_at' => 'datetime',
     ];
 
     public function shift(): BelongsTo
@@ -39,6 +42,11 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function refundedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'refunded_by_user_id');
     }
 
     public function details(): HasMany
