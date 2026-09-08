@@ -106,7 +106,12 @@ class ProductSeeder extends Seeder
             'size' => 'Regular',
             'items' => [
                 'Apple Cinnamon Muffin' => 65,
+                'Banana Bar' => 35,
                 'Banana Chocolate Muffin' => 60,
+                'Chocolate Bar' => 35,
+                'Cookies' => 65,
+                'Ensaymada' => 45,
+                'Fluppy mamon' => 35,
             ],
         ],
         'Others' => [
