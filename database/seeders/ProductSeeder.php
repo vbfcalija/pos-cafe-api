@@ -217,7 +217,8 @@ class ProductSeeder extends Seeder
 
     private function cost(float $price): float
     {
-        return round($price * self::COST_MARGIN, 2);
+        return $price;
+        // return round($price * self::COST_MARGIN, 2);
     }
 
     /**
