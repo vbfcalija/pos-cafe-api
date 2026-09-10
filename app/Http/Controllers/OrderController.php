@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Order\StoreOrderRequest;
+use App\Http\Requests\Order\UpdatePaymentRequest;
 use App\Interface\Service\OrderServiceInterface;
 use Illuminate\Http\Request;
 
@@ -38,5 +39,10 @@ class OrderController extends Controller
     public function refund(Request $request, string $uuid)
     {
         return $this->orderService->refundOrder($uuid, $request);
+    }
+
+    public function updatePayment(UpdatePaymentRequest $request, string $uuid, string $paymentUuid)
+    {
+        return $this->orderService->updatePayment($uuid, $paymentUuid, $request);
     }
 }

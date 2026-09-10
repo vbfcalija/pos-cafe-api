@@ -8,6 +8,7 @@ use App\Interface\Repository\OrderRepositoryInterface;
 use App\Interface\Service\OrderServiceInterface;
 use App\Models\Discount;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\Shift;
 use App\Traits\SortingTraits;
@@ -157,6 +158,23 @@ class OrderService implements OrderServiceInterface
                 'message' => 'This order has already been refunded.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        return new OrderResource($this->orderRepository->findByUuid($uuid));
+    }
+
+    public function updatePayment(string $uuid, string $paymentUuid, object $payload)
+    {
+        $order = Order::where('uuid', $uuid)->firstOrFail();
+
+        $payment = Payment::where('uuid', $paymentUuid)
+            ->where('order_id', $order->id)
+            ->firstOrFail();
+
+        $payment->update([
+            'payment_method' => $payload->payment_method,
+            'reference' => $payload->reference ?: null,
+            'user_id' => $payload->user()->id,
+        ]);
 
         return new OrderResource($this->orderRepository->findByUuid($uuid));
     }

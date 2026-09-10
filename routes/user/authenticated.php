@@ -36,4 +36,5 @@ Route::prefix('user')->group(function () {
     Route::post('orders', [OrderController::class, 'store']);
     Route::post('orders/{uuid}/print', [OrderController::class, 'print']);
     Route::post('orders/{uuid}/refund', [OrderController::class, 'refund']);
+    Route::patch('orders/{uuid}/payments/{paymentUuid}', [OrderController::class, 'updatePayment']);
 });

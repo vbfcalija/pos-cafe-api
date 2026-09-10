@@ -13,4 +13,6 @@ interface OrderServiceInterface
     public function printReceipt(string $uuid);
 
     public function refundOrder(string $uuid, object $payload);
+
+    public function updatePayment(string $uuid, string $paymentUuid, object $payload);
 }
