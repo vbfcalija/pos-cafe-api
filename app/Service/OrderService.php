@@ -60,12 +60,6 @@ class OrderService implements OrderServiceInterface
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ($shift && $shift->user_id !== $payload->user()->id) {
-            return response()->json([
-                'message' => 'The selected shift does not belong to the current user.',
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
         $order = DB::transaction(function () use ($payload) {
             $order = $this->orderRepository->create($payload);
 
