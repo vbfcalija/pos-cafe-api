@@ -175,8 +175,9 @@ class OrderService implements OrderServiceInterface
      * to this printer directly: it's classic Bluetooth SPP, and the Web
      * Bluetooth API only supports BLE, so there is no in-browser path to
      * it at all. RawBT (a local Android app) bridges that gap — a web page
-     * hands it raw ESC/POS bytes via its `rawbt:<base64>` URL scheme, and
-     * RawBT does the actual SPP Bluetooth printing using real Android
+     * hands it raw ESC/POS bytes via an `intent:base64,<data>#Intent;...`
+     * URL (matching escpos-php's own RawbtPrintConnector), and RawBT does
+     * the actual SPP Bluetooth printing using real Android
      * APIs. This returns those bytes, base64-encoded, for the frontend to
      * hand off to RawBT; there's no way to get a real success/failure
      * signal back from that handoff, so the frontend must not claim the
