@@ -36,6 +36,16 @@ class OrderController extends Controller
         return $this->orderService->printReceipt($uuid);
     }
 
+    public function downloadReceipt(string $uuid)
+    {
+        return $this->orderService->downloadReceipt($uuid);
+    }
+
+    public function receiptEscPos(string $uuid)
+    {
+        return $this->orderService->receiptEscPos($uuid);
+    }
+
     public function refund(Request $request, string $uuid)
     {
         return $this->orderService->refundOrder($uuid, $request);

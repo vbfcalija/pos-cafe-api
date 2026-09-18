@@ -12,9 +12,11 @@ use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\Shift;
 use App\Traits\SortingTraits;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Blutrixx\EscPosPrinter\Facades\EscPosPrinter;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Native\Mobile\Facades\Share;
 
 class OrderService implements OrderServiceInterface
 {
@@ -95,7 +97,7 @@ class OrderService implements OrderServiceInterface
         });
 
         return new OrderResource(
-            $order->load('shift.branch', 'customer', 'user', 'details.productVariant', 'details.discount', 'payments.user')
+            $order->load('shift.branch', 'customer', 'user', 'details.productVariant.product', 'details.discount', 'payments.user')
         );
     }
 
@@ -112,18 +114,82 @@ class OrderService implements OrderServiceInterface
 
         $result = EscPosPrinter::print($this->formatReceipt($order));
 
-        // The plugin returns different failure shapes depending on why it
-        // failed: {error: '...'} for a real on-device failure (e.g. no
-        // bonded printer), or {status: false, message: '...'} when the
-        // native bridge itself isn't present at all (e.g. this endpoint hit
-        // outside the packaged mobile app). Both mean nothing printed.
-        if (isset($result['error']) || ($result['status'] ?? true) === false) {
+        // Require an explicit `printed: true` — that's the only thing the
+        // native Android side (blutrixx's Print handler) returns on a
+        // genuine success. Everything else, including a plain {error: '...'}
+        // on-device (no bonded printer), is treated as failure — and so is
+        // an *empty* result, which is what the plugin's ensureConnected()
+        // silently falls back to reporting as "connected" when there's no
+        // native bridge at all (this dev/browser environment, or
+        // NativePHP's "Jump" hybrid dev-relay with nothing actually
+        // connected). Trusting anything short of `printed: true` used to
+        // read as success here, which is exactly backwards: print failures
+        // must never look like success.
+        if (($result['printed'] ?? false) !== true) {
             return response()->json([
-                'message' => 'Printer not detected. Make sure a Bluetooth thermal printer is paired and try again.',
+                'message' => $result['error'] ?? 'Printer not detected. Make sure a Bluetooth thermal printer is paired and try again.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return response()->json(['message' => 'Success.'], Response::HTTP_OK);
+    }
+
+    /**
+     * Renders the receipt as a PDF for the "Save as PDF" action in the
+     * print-preview modal. Inside the packaged mobile app there's no
+     * browser to hand a file download to — NativePHP's WebView doesn't
+     * support downloads at all — so the PDF is saved to the app's own
+     * storage and handed to Android's native share sheet instead, letting
+     * the user save it to Files/Drive or open it in another app. Outside
+     * the app (plain web/dev), it's just a normal browser download.
+     */
+    public function downloadReceipt(string $uuid)
+    {
+        $order = $this->orderRepository->findByUuid($uuid);
+        $order->load('details.productVariant.product');
+
+        $filename = "receipt-{$order->order_no}.pdf";
+
+        // Custom paper size in points (58mm ≈ 164pt wide, matching the
+        // Bluetooth ESC/POS print width) — height is generously oversized
+        // since dompdf paginates a fixed page rather than growing it to fit
+        // content, and a receipt is always far shorter than this.
+        $pdf = Pdf::loadView('receipts.thermal', $this->receiptViewData($order))
+            ->setPaper([0, 0, 164, 2000]);
+
+        if (env('NATIVEPHP_RUNNING')) {
+            $path = storage_path("app/private/{$filename}");
+            $pdf->save($path);
+            Share::file("Receipt #{$order->order_no}", config('app.name').' receipt', $path);
+
+            return response()->json(['message' => 'Success.', 'delivered_via' => 'share']);
+        }
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * The app is now accessed as a plain website (no native app wrapper),
+     * so NativePHP's Bluetooth bridge (printReceipt() above) is unreachable
+     * — that only exists inside a compiled app. A browser also can't talk
+     * to this printer directly: it's classic Bluetooth SPP, and the Web
+     * Bluetooth API only supports BLE, so there is no in-browser path to
+     * it at all. RawBT (a local Android app) bridges that gap — a web page
+     * hands it raw ESC/POS bytes via its `rawbt:<base64>` URL scheme, and
+     * RawBT does the actual SPP Bluetooth printing using real Android
+     * APIs. This returns those bytes, base64-encoded, for the frontend to
+     * hand off to RawBT; there's no way to get a real success/failure
+     * signal back from that handoff, so the frontend must not claim the
+     * print definitely succeeded.
+     */
+    public function receiptEscPos(string $uuid)
+    {
+        $order = $this->orderRepository->findByUuid($uuid);
+        $order->load('details.productVariant.product');
+
+        return response()->json([
+            'data' => base64_encode($this->buildEscPosBytes($this->receiptViewData($order))),
+        ]);
     }
 
     /**
@@ -237,5 +303,131 @@ class OrderService implements OrderServiceInterface
             "[C]<b>Thank you!</b>\n" .
             "[C]Please come again.\n" .
             "[C]\n";
+    }
+
+    /**
+     * Same tax-inclusive math as formatReceipt(), structured for the
+     * receipts.thermal Blade view instead of ESC/POS [L]/[C]/[R] tags.
+     * Duplicated rather than shared with formatReceipt() so the
+     * already-verified Bluetooth print path can't be affected by changes
+     * made here.
+     */
+    private function receiptViewData(Order $order): array
+    {
+        $items = [];
+        $subtotal = 0.0;
+        $discountTotal = 0.0;
+        $taxTotal = 0.0;
+
+        foreach ($order->details as $detail) {
+            $lineGross = $detail->quantity * (float) $detail->price;
+            $discount = $detail->discount;
+
+            $afterDiscount = match ($discount?->type) {
+                DiscountType::Percentage => round($lineGross - ($lineGross * (float) $discount->value / 100), 2),
+                DiscountType::Amount => max(0.0, $lineGross - (float) $discount->value),
+                default => $lineGross,
+            };
+
+            $rate = (float) $detail->tax_percentage / 100;
+            $lineTax = round($afterDiscount * $rate / (1 + $rate), 2);
+
+            $subtotal += $afterDiscount - $lineTax;
+            $discountTotal += $lineGross - $afterDiscount;
+            $taxTotal += $lineTax;
+
+            $variantName = $detail->productVariant->name;
+            $productName = $detail->productVariant->product->name;
+
+            $items[] = [
+                'label' => $variantName === 'Regular' ? $productName : "{$productName} ({$variantName})",
+                'quantity' => $detail->quantity,
+                'price' => (float) $detail->price,
+                'total' => $afterDiscount,
+                'discountName' => $discount?->name,
+                'discountAmount' => $discount ? $lineGross - $afterDiscount : null,
+            ];
+        }
+
+        return [
+            'appName' => config('app.name'),
+            'branchName' => $order->shift?->branch?->name,
+            'order' => $order,
+            'items' => $items,
+            'subtotal' => $subtotal,
+            'discountTotal' => $discountTotal,
+            'taxTotal' => $taxTotal,
+            'grandTotal' => $subtotal + $taxTotal,
+            'paymentMethods' => $order->payments->pluck('payment_method.value')->unique()->implode(', '),
+        ];
+    }
+
+    /**
+     * Real ESC/POS bytes for RawBT to hand to the printer as-is — same
+     * content/tax math as receiptViewData() feeds the PDF view, same
+     * 32-column width and command set verified against real hardware
+     * earlier (bold via ESC E, center/left align via ESC a, partial cut
+     * via GS V). Kept separate from formatReceipt()'s [L]/[C]/[R] tags,
+     * which are that *other* plugin's own markup, not real ESC/POS.
+     */
+    private function buildEscPosBytes(array $data): string
+    {
+        $esc = "\x1b";
+        $gs = "\x1d";
+        $width = 32;
+
+        $boldOn = $esc.'E'."\x01";
+        $boldOff = $esc.'E'."\x00";
+        $alignCenter = $esc.'a'."\x01";
+        $alignLeft = $esc.'a'."\x00";
+
+        $lr = function (string $left, string $right) use ($width) {
+            $space = max(1, $width - strlen($left) - strlen($right));
+
+            return $left.str_repeat(' ', $space).$right;
+        };
+
+        $out = $esc.'@'; // initialize
+        $out .= $alignCenter.$boldOn.$data['appName']."\n".$boldOff;
+        if ($data['branchName']) {
+            $out .= $data['branchName']."\n";
+        }
+        $out .= $alignLeft;
+        $out .= str_repeat('-', $width)."\n";
+        $out .= 'Order #: '.$data['order']->order_no."\n";
+        $out .= 'Date: '.$data['order']->date->format('Y-m-d H:i')."\n";
+        $out .= 'Cashier: '.$data['order']->user->firstname.' '.$data['order']->user->lastname."\n";
+        if ($data['order']->customer) {
+            $out .= 'Customer: '.$data['order']->customer->name."\n";
+        }
+        $out .= str_repeat('-', $width)."\n";
+
+        foreach ($data['items'] as $item) {
+            foreach (explode("\n", wordwrap($item['label'], $width, "\n", true)) as $labelLine) {
+                $out .= $labelLine."\n";
+            }
+            $out .= $lr($item['quantity'].' x '.number_format($item['price'], 2), number_format($item['total'], 2))."\n";
+
+            if ($item['discountName']) {
+                $out .= $lr('  '.$item['discountName'], '-'.number_format($item['discountAmount'], 2))."\n";
+            }
+        }
+
+        $out .= str_repeat('-', $width)."\n";
+        $out .= $lr('Subtotal', number_format($data['subtotal'], 2))."\n";
+        $out .= $lr('Discount', '-'.number_format($data['discountTotal'], 2))."\n";
+        $out .= $lr('Tax', number_format($data['taxTotal'], 2))."\n";
+        $out .= $boldOn.$lr('TOTAL', number_format($data['grandTotal'], 2))."\n".$boldOff;
+        $out .= str_repeat('-', $width)."\n";
+        $out .= 'Payment: '.$data['paymentMethods']."\n";
+        $out .= "\n";
+        $out .= $alignCenter;
+        $out .= "Thank you!\n";
+        $out .= "Please come again.\n";
+        $out .= $alignLeft;
+        $out .= "\n\n\n";
+        $out .= $gs.'V'."\x01"; // partial cut
+
+        return $out;
     }
 }

@@ -35,6 +35,8 @@ Route::prefix('user')->group(function () {
     Route::get('orders/{uuid}', [OrderController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
     Route::post('orders/{uuid}/print', [OrderController::class, 'print']);
+    Route::post('orders/{uuid}/receipt-pdf', [OrderController::class, 'downloadReceipt']);
+    Route::post('orders/{uuid}/receipt-escpos', [OrderController::class, 'receiptEscPos']);
     Route::post('orders/{uuid}/refund', [OrderController::class, 'refund']);
     Route::patch('orders/{uuid}/payments/{paymentUuid}', [OrderController::class, 'updatePayment']);
 });
