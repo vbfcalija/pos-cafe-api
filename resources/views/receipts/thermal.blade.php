@@ -3,16 +3,17 @@
 <head>
     <meta charset="utf-8">
     <style>
-        {{-- dompdf doesn't support flexbox — left/right justified rows use
-        floats instead, the layout dompdf actually renders reliably. --}}
+        {{-- dompdf's float + overflow:hidden clearfix collapses these rows to
+        zero height instead of clearing them, so left/right justified rows
+        use a two-cell table instead — dompdf renders table layout reliably. --}}
         @page { margin: 0; }
         body { margin: 0; padding: 6px 8px; font-family: "DejaVu Sans Mono", monospace; font-size: 8px; line-height: 1.5; color: #000; }
         p { margin: 0; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
-        .row { overflow: hidden; }
-        .row .left { float: left; }
-        .row .right { float: right; }
+        .row { width: 100%; border-collapse: collapse; }
+        .row td { padding: 0; }
+        .row .right { text-align: right; }
         hr { border: none; border-top: 1px dashed #000; margin: 4px 0; }
         .item { margin-bottom: 2px; }
     </style>
@@ -33,23 +34,23 @@
     @foreach ($items as $item)
         <div class="item">
             <p>{{ $item['label'] }}</p>
-            <div class="row">
-                <span class="left">{{ $item['quantity'] }} x {{ number_format($item['price'], 2) }}</span>
-                <span class="right">{{ number_format($item['total'], 2) }}</span>
-            </div>
+            <table class="row"><tr>
+                <td>{{ $item['quantity'] }} x {{ number_format($item['price'], 2) }}</td>
+                <td class="right">{{ number_format($item['total'], 2) }}</td>
+            </tr></table>
             @if ($item['discountName'])
-                <div class="row">
-                    <span class="left">&nbsp;&nbsp;{{ $item['discountName'] }}</span>
-                    <span class="right">-{{ number_format($item['discountAmount'], 2) }}</span>
-                </div>
+                <table class="row"><tr>
+                    <td>&nbsp;&nbsp;{{ $item['discountName'] }}</td>
+                    <td class="right">-{{ number_format($item['discountAmount'], 2) }}</td>
+                </tr></table>
             @endif
         </div>
     @endforeach
     <hr>
-    <div class="row"><span class="left">Subtotal</span><span class="right">{{ number_format($subtotal, 2) }}</span></div>
-    <div class="row"><span class="left">Discount</span><span class="right">-{{ number_format($discountTotal, 2) }}</span></div>
-    <div class="row"><span class="left">Tax</span><span class="right">{{ number_format($taxTotal, 2) }}</span></div>
-    <div class="row bold"><span class="left">TOTAL</span><span class="right">{{ number_format($grandTotal, 2) }}</span></div>
+    <table class="row"><tr><td>Subtotal</td><td class="right">{{ number_format($subtotal, 2) }}</td></tr></table>
+    <table class="row"><tr><td>Discount</td><td class="right">-{{ number_format($discountTotal, 2) }}</td></tr></table>
+    <table class="row"><tr><td>Tax</td><td class="right">{{ number_format($taxTotal, 2) }}</td></tr></table>
+    <table class="row bold"><tr><td>TOTAL</td><td class="right">{{ number_format($grandTotal, 2) }}</td></tr></table>
     <hr>
     <p>Payment: {{ $paymentMethods }}</p>
     <p>&nbsp;</p>
