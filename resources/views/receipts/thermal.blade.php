@@ -25,7 +25,7 @@
     @endif
     <hr>
     <p>Order #: {{ $order->order_no }}</p>
-    <p>Date: {{ $order->date->format('Y-m-d H:i') }}</p>
+    <p>Date: {{ $order->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i') }}</p>
     <p>Cashier: {{ $order->user->firstname }} {{ $order->user->lastname }}</p>
     @if ($order->customer)
         <p>Customer: {{ $order->customer->name }}</p>

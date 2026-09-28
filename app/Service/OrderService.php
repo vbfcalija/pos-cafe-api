@@ -288,7 +288,7 @@ class OrderService implements OrderServiceInterface
             ($branch ? "[C]{$branch->name}\n" : '') .
             "[C]================================\n" .
             "[L]Order #: {$order->order_no}\n" .
-            "[L]Date: {$order->date->format('Y-m-d H:i')}\n" .
+            "[L]Date: {$order->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')}\n" .
             "[L]Cashier: {$order->user->firstname} {$order->user->lastname}\n" .
             ($order->customer ? "[L]Customer: {$order->customer->name}\n" : '') .
             "[C]--------------------------------\n" .
@@ -396,7 +396,7 @@ class OrderService implements OrderServiceInterface
         $out .= $alignLeft;
         $out .= str_repeat('-', $width)."\n";
         $out .= 'Order #: '.$data['order']->order_no."\n";
-        $out .= 'Date: '.$data['order']->date->format('Y-m-d H:i')."\n";
+        $out .= 'Date: '.$data['order']->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')."\n";
         $out .= 'Cashier: '.$data['order']->user->firstname.' '.$data['order']->user->lastname."\n";
         if ($data['order']->customer) {
             $out .= 'Customer: '.$data['order']->customer->name."\n";
