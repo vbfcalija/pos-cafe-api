@@ -14,6 +14,8 @@ class UpdateProductVariantRequest extends FormRequest
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'cost' => ['sometimes', 'required', 'numeric', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
+            'is_track_stock' => ['sometimes', 'boolean'],
+            'current_stocks' => ['sometimes', 'integer', 'min:0'],
         ];
     }
 }

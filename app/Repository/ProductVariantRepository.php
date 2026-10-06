@@ -31,6 +31,8 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
         $variant->price = $payload->price;
         $variant->cost = $payload->cost;
         $variant->is_active = $payload->is_active ?? true;
+        $variant->is_track_stock = $payload->is_track_stock ?? false;
+        $variant->current_stocks = $payload->current_stocks ?? 0;
         $variant->save();
 
         return $variant->fresh();
@@ -48,6 +50,8 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
         $variant->price = $payload->price ?? $variant->price;
         $variant->cost = $payload->cost ?? $variant->cost;
         $variant->is_active = $payload->is_active ?? $variant->is_active;
+        $variant->is_track_stock = $payload->is_track_stock ?? $variant->is_track_stock;
+        $variant->current_stocks = $payload->current_stocks ?? $variant->current_stocks;
         $variant->save();
 
         return $variant->fresh();

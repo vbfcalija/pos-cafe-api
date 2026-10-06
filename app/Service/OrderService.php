@@ -68,6 +68,7 @@ class OrderService implements OrderServiceInterface
             foreach ($payload->lines as $line) {
                 $variant = ProductVariant::with('product.taxRate')
                     ->where('uuid', $line['product_variant_uuid'])
+                    ->lockForUpdate()
                     ->firstOrFail();
 
                 $discount = isset($line['discount_uuid'])
@@ -82,6 +83,10 @@ class OrderService implements OrderServiceInterface
                     'tax_percentage' => $variant->product->taxRate->percentage,
                     'discount_id' => $discount?->id,
                 ]);
+
+                if ($variant->is_track_stock) {
+                    $variant->decrement('current_stocks', $line['quantity']);
+                }
             }
 
             foreach ($payload->payments as $payment) {
@@ -160,7 +165,7 @@ class OrderService implements OrderServiceInterface
         if (env('NATIVEPHP_RUNNING')) {
             $path = storage_path("app/private/{$filename}");
             $pdf->save($path);
-            Share::file("Receipt #{$order->order_no}", config('app.name').' receipt', $path);
+            Share::file("Receipt #{$order->order_no}", config('app.name') . ' receipt', $path);
 
             return response()->json(['message' => 'Success.', 'delivered_via' => 'share']);
         }
@@ -210,6 +215,12 @@ class OrderService implements OrderServiceInterface
                 'refunded_at' => now(),
                 'refunded_by_user_id' => $payload->user()->id,
             ]);
+
+            foreach ($order->details()->with('productVariant')->get() as $detail) {
+                if ($detail->productVariant->is_track_stock) {
+                    $detail->productVariant->increment('current_stocks', $detail->quantity);
+                }
+            }
 
             return $order;
         });
@@ -377,57 +388,57 @@ class OrderService implements OrderServiceInterface
         $gs = "\x1d";
         $width = 32;
 
-        $boldOn = $esc.'E'."\x01";
-        $boldOff = $esc.'E'."\x00";
-        $alignCenter = $esc.'a'."\x01";
-        $alignLeft = $esc.'a'."\x00";
+        $boldOn = $esc . 'E' . "\x01";
+        $boldOff = $esc . 'E' . "\x00";
+        $alignCenter = $esc . 'a' . "\x01";
+        $alignLeft = $esc . 'a' . "\x00";
 
         $lr = function (string $left, string $right) use ($width) {
             $space = max(1, $width - strlen($left) - strlen($right));
 
-            return $left.str_repeat(' ', $space).$right;
+            return $left . str_repeat(' ', $space) . $right;
         };
 
-        $out = $esc.'@'; // initialize
-        $out .= $alignCenter.$boldOn.$data['appName']."\n".$boldOff;
+        $out = $esc . '@'; // initialize
+        $out .= $alignCenter . $boldOn . $data['appName'] . "\n" . $boldOff;
         if ($data['branchName']) {
-            $out .= $data['branchName']."\n";
+            $out .= $data['branchName'] . "\n";
         }
         $out .= $alignLeft;
-        $out .= str_repeat('-', $width)."\n";
-        $out .= 'Order #: '.$data['order']->order_no."\n";
-        $out .= 'Date: '.$data['order']->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')."\n";
-        $out .= 'Cashier: '.$data['order']->user->firstname.' '.$data['order']->user->lastname."\n";
+        $out .= str_repeat('-', $width) . "\n";
+        $out .= 'Order #: ' . $data['order']->order_no . "\n";
+        $out .= 'Date: ' . $data['order']->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i') . "\n";
+        $out .= 'Cashier: ' . $data['order']->user->firstname . ' ' . $data['order']->user->lastname . "\n";
         if ($data['order']->customer) {
-            $out .= 'Customer: '.$data['order']->customer->name."\n";
+            $out .= 'Customer: ' . $data['order']->customer->name . "\n";
         }
-        $out .= str_repeat('-', $width)."\n";
+        $out .= str_repeat('-', $width) . "\n";
 
         foreach ($data['items'] as $item) {
             foreach (explode("\n", wordwrap($item['label'], $width, "\n", true)) as $labelLine) {
-                $out .= $labelLine."\n";
+                $out .= $labelLine . "\n";
             }
-            $out .= $lr($item['quantity'].' x '.number_format($item['price'], 2), number_format($item['total'], 2))."\n";
+            $out .= $lr($item['quantity'] . ' x ' . number_format($item['price'], 2), number_format($item['total'], 2)) . "\n";
 
             if ($item['discountName']) {
-                $out .= $lr('  '.$item['discountName'], '-'.number_format($item['discountAmount'], 2))."\n";
+                $out .= $lr('  ' . $item['discountName'], '-' . number_format($item['discountAmount'], 2)) . "\n";
             }
         }
 
-        $out .= str_repeat('-', $width)."\n";
-        $out .= $lr('Subtotal', number_format($data['subtotal'], 2))."\n";
-        $out .= $lr('Discount', '-'.number_format($data['discountTotal'], 2))."\n";
-        $out .= $lr('Tax', number_format($data['taxTotal'], 2))."\n";
-        $out .= $boldOn.$lr('TOTAL', number_format($data['grandTotal'], 2))."\n".$boldOff;
-        $out .= str_repeat('-', $width)."\n";
-        $out .= 'Payment: '.$data['paymentMethods']."\n";
+        $out .= str_repeat('-', $width) . "\n";
+        $out .= $lr('Subtotal', number_format($data['subtotal'], 2)) . "\n";
+        $out .= $lr('Discount', '-' . number_format($data['discountTotal'], 2)) . "\n";
+        $out .= $lr('Tax', number_format($data['taxTotal'], 2)) . "\n";
+        $out .= $boldOn . $lr('TOTAL', number_format($data['grandTotal'], 2)) . "\n" . $boldOff;
+        $out .= str_repeat('-', $width) . "\n";
+        $out .= 'Payment: ' . $data['paymentMethods'] . "\n";
         $out .= "\n";
         $out .= $alignCenter;
         $out .= "Thank you!\n";
         $out .= "Please come again.\n";
         $out .= $alignLeft;
         $out .= "\n\n\n";
-        $out .= $gs.'V'."\x01"; // partial cut
+        $out .= $gs . 'V' . "\x01"; // partial cut
 
         return $out;
     }

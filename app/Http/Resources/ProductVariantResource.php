@@ -15,6 +15,8 @@ class ProductVariantResource extends JsonResource
             'price' => (float) $this->price,
             'cost' => (float) $this->cost,
             'is_active' => $this->is_active,
+            'is_track_stock' => $this->is_track_stock,
+            'current_stocks' => $this->current_stocks,
             'product' => new ProductResource($this->whenLoaded('product')),
         ];
     }

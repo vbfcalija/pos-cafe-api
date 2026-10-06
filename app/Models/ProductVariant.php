@@ -20,12 +20,16 @@ class ProductVariant extends Model
         'price',
         'cost',
         'is_active',
+        'is_track_stock',
+        'current_stocks',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'cost' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_track_stock' => 'boolean',
+        'current_stocks' => 'integer',
     ];
 
     public function product(): BelongsTo
