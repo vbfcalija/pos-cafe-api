@@ -17,6 +17,8 @@ class ProductVariant extends Model
         'uuid',
         'product_id',
         'name',
+        'sku',
+        'barcode',
         'price',
         'cost',
         'is_active',

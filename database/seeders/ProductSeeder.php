@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\TaxRate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class ProductSeeder extends Seeder
 {
@@ -31,7 +33,7 @@ class ProductSeeder extends Seeder
 
     /**
      * One Product + one ProductVariant per drink. Keyed by category name;
-     * each category holds its description, the SKU tier code appended to
+     * each category holds its description, the variant SKU tier code appended to
      * disambiguate a drink that also appears in another tier's category
      * (e.g. "Iced Latte" in both Budget Brew and Iced Premium), the single
      * variant's size label, and drink name => price.
@@ -152,6 +154,15 @@ class ProductSeeder extends Seeder
 
     public function run(): void
     {
+        // Also run from the 2026_09_03 seed migration, i.e. before SKUs moved
+        // from products to product_variants on a fresh install — so the SKU is
+        // written to whichever table has the column at the time. Unguarded so
+        // that works when called directly (outside db:seed) too.
+        Model::unguarded(fn () => $this->seed());
+    }
+
+    private function seed(): void
+    {
         $taxRate = TaxRate::firstOrCreate(
             ['name' => self::TAX_RATE_NAME],
             ['percentage' => self::TAX_RATE_PERCENTAGE]
@@ -174,20 +185,13 @@ class ProductSeeder extends Seeder
         );
 
         foreach (self::HOT_PREMIUM as $drink => $sizes) {
-            $product = Product::firstOrCreate(
-                ['sku' => $this->sku($drink, self::HOT_PREMIUM_TIER)],
-                [
-                    'name' => $drink,
-                    'category_id' => $hotPremium->id,
-                    'tax_rate_id' => $taxRate->id,
-                ]
-            );
+            $sku = $this->sku($drink, self::HOT_PREMIUM_TIER);
+            $product = $this->firstOrCreateProduct($drink, $hotPremium, $taxRate, $sku);
 
+            // Two sizes share one product, so each size's SKU gets the size
+            // appended (e.g. "CF-LT-HP-8OZ") to keep variant SKUs unique.
             foreach ($sizes as $size => $price) {
-                $product->variants()->firstOrCreate(
-                    ['name' => $size],
-                    ['price' => $price, 'cost' => $this->cost($price), 'is_active' => true]
-                );
+                $this->firstOrCreateVariant($product, $size, $price, $sku . '-' . strtoupper($size));
             }
         }
     }
@@ -200,19 +204,39 @@ class ProductSeeder extends Seeder
         string $size,
         float $price
     ): void {
-        $product = Product::firstOrCreate(
-            ['sku' => $this->sku($drink, $tier)],
-            [
-                'name' => $drink,
-                'category_id' => $category->id,
-                'tax_rate_id' => $taxRate->id,
-            ]
-        );
+        $sku = $this->sku($drink, $tier);
+        $product = $this->firstOrCreateProduct($drink, $category, $taxRate, $sku);
 
-        $product->variants()->firstOrCreate(
-            ['name' => $size],
-            ['price' => $price, 'cost' => $this->cost($price), 'is_active' => true]
+        $this->firstOrCreateVariant($product, $size, $price, $sku);
+    }
+
+    /**
+     * A drink name is unique within its category (the tier), so name +
+     * category identifies the product.
+     */
+    private function firstOrCreateProduct(string $drink, Category $category, TaxRate $taxRate, string $sku): Product
+    {
+        $attributes = ['tax_rate_id' => $taxRate->id];
+
+        if (Schema::hasColumn('products', 'sku')) {
+            $attributes['sku'] = $sku;
+        }
+
+        return Product::firstOrCreate(
+            ['name' => $drink, 'category_id' => $category->id],
+            $attributes
         );
+    }
+
+    private function firstOrCreateVariant(Product $product, string $size, float $price, string $sku): void
+    {
+        $attributes = ['price' => $price, 'cost' => $this->cost($price), 'is_active' => true];
+
+        if (Schema::hasColumn('product_variants', 'sku')) {
+            $attributes['sku'] = $sku;
+        }
+
+        $product->variants()->firstOrCreate(['name' => $size], $attributes);
     }
 
     private function cost(float $price): float

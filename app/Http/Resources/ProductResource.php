@@ -11,8 +11,6 @@ class ProductResource extends JsonResource
     {
         return [
             'uuid' => $this->uuid,
-            'sku' => $this->sku,
-            'barcode' => $this->barcode,
             'name' => $this->name,
             'color' => $this->color,
             'category' => new CategoryResource($this->whenLoaded('category')),

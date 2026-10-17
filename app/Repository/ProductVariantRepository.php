@@ -28,6 +28,8 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
         $variant = new ProductVariant;
         $variant->product_id = Product::where('uuid', $payload->product_uuid)->firstOrFail()->id;
         $variant->name = $payload->name;
+        $variant->sku = $payload->sku;
+        $variant->barcode = $payload->barcode ?: null;
         $variant->price = $payload->price;
         $variant->cost = $payload->cost;
         $variant->is_active = $payload->is_active ?? true;
@@ -47,6 +49,13 @@ class ProductVariantRepository implements ProductVariantRepositoryInterface
         }
 
         $variant->name = $payload->name ?? $variant->name;
+        $variant->sku = $payload->sku ?? $variant->sku;
+
+        // has() rather than ??, so a barcode can be cleared by sending it empty.
+        if ($payload->has('barcode')) {
+            $variant->barcode = $payload->barcode ?: null;
+        }
+
         $variant->price = $payload->price ?? $variant->price;
         $variant->cost = $payload->cost ?? $variant->cost;
         $variant->is_active = $payload->is_active ?? $variant->is_active;

@@ -17,10 +17,10 @@ class ProductVariantFilter extends ModelFilter
     {
         return $this->where(function ($query) use ($search) {
             $query->where('name', 'LIKE', "%{$search}%")
+                ->orWhere('sku', 'LIKE', "%{$search}%")
+                ->orWhere('barcode', 'LIKE', "%{$search}%")
                 ->orWhereHas('product', function ($productQuery) use ($search) {
-                    $productQuery->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('sku', 'LIKE', "%{$search}%")
-                        ->orWhere('barcode', 'LIKE', "%{$search}%");
+                    $productQuery->where('name', 'LIKE', "%{$search}%");
                 });
         });
     }

@@ -27,8 +27,6 @@ class ProductRepository implements ProductRepositoryInterface
     public function create(object $payload)
     {
         $product = new Product;
-        $product->sku = $payload->sku;
-        $product->barcode = $payload->barcode ?? null;
         $product->name = $payload->name;
         $product->color = $payload->color ?? null;
         $product->category_id = Category::where('uuid', $payload->category_uuid)->firstOrFail()->id;
@@ -41,8 +39,6 @@ class ProductRepository implements ProductRepositoryInterface
     public function update(object $payload, string $uuid)
     {
         $product = Product::where('uuid', $uuid)->firstOrFail();
-        $product->sku = $payload->sku ?? $product->sku;
-        $product->barcode = $payload->barcode ?? $product->barcode;
         $product->name = $payload->name ?? $product->name;
         $product->color = $payload->color ?? $product->color;
 
