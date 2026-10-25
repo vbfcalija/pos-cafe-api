@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use App\Traits\UsesUuid;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shift extends Model
 {
-    use Filterable, HasFactory, UsesUuid;
+    use Filterable, HasFactory, LogsActivity, UsesUuid;
 
     protected $fillable = [
         'uuid',
@@ -42,5 +43,10 @@ class Shift extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return trim($this->name . ($this->branch ? ' · ' . $this->branch->name : ''));
     }
 }

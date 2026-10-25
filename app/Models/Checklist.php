@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ChecklistStatus;
+use App\Traits\LogsActivity;
 use App\Traits\UsesUuid;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Checklist extends Model
 {
-    use Filterable, HasFactory, UsesUuid;
+    use Filterable, HasFactory, LogsActivity, UsesUuid;
 
     protected $fillable = [
         'uuid',
@@ -48,5 +49,28 @@ class Checklist extends Model
     public function isVerified(): bool
     {
         return $this->status === ChecklistStatus::Verified;
+    }
+
+    public function activityLabel(): string
+    {
+        return trim(($this->branch?->name ?? 'Branch') . ' · ' . $this->date?->format('M j, Y'));
+    }
+
+    public function activityEventName(string $event, array $changes): string
+    {
+        return match ($changes['status']['new'] ?? null) {
+            'verified' => 'verified',
+            'pending' => 'reopened',
+            default => $event,
+        };
+    }
+
+    public function activityDescription(string $event, array $changes): ?string
+    {
+        return match ($this->activityEventName($event, $changes)) {
+            'verified' => "Verified checklist “{$this->activityLabel()}”",
+            'reopened' => "Reopened checklist “{$this->activityLabel()}”",
+            default => null,
+        };
     }
 }

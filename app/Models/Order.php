@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use App\Traits\UsesUuid;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
-    use Filterable, HasFactory, UsesUuid;
+    use Filterable, HasFactory, LogsActivity, UsesUuid;
+
+    // Orders are never deleted; a refund is an update.
+    protected static array $activityEvents = ['created', 'updated'];
 
     protected $fillable = [
         'uuid',
@@ -57,5 +61,24 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return '#' . $this->order_no;
+    }
+
+    public function activityEventName(string $event, array $changes): string
+    {
+        return $event === 'updated' && filled($changes['refunded_at']['new'] ?? null) ? 'refunded' : $event;
+    }
+
+    public function activityDescription(string $event, array $changes): ?string
+    {
+        return match ($this->activityEventName($event, $changes)) {
+            'created' => "Created order {$this->activityLabel()}",
+            'refunded' => "Refunded order {$this->activityLabel()}",
+            default => null,
+        };
     }
 }

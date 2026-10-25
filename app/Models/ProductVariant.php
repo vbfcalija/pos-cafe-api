@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use App\Traits\UsesUuid;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariant extends Model
 {
-    use Filterable, HasFactory, UsesUuid;
+    use Filterable, HasFactory, LogsActivity, UsesUuid;
 
     protected $fillable = [
         'uuid',
@@ -42,5 +43,10 @@ class ProductVariant extends Model
     public function orderDetails(): HasMany
     {
         return $this->hasMany(OrderDetail::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return $this->product ? "{$this->product->name} ({$this->name})" : (string) $this->name;
     }
 }

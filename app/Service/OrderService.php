@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\Shift;
+use App\Support\ActivityLogger;
 use App\Traits\SortingTraits;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Blutrixx\EscPosPrinter\Facades\EscPosPrinter;
@@ -84,8 +85,9 @@ class OrderService implements OrderServiceInterface
                     'discount_id' => $discount?->id,
                 ]);
 
+                // Stock moving with each sale isn't logged as a separate action; the order is.
                 if ($variant->is_track_stock) {
-                    $variant->decrement('current_stocks', $line['quantity']);
+                    ActivityLogger::withoutLogging(fn () => $variant->decrement('current_stocks', $line['quantity']));
                 }
             }
 
@@ -218,7 +220,7 @@ class OrderService implements OrderServiceInterface
 
             foreach ($order->details()->with('productVariant')->get() as $detail) {
                 if ($detail->productVariant->is_track_stock) {
-                    $detail->productVariant->increment('current_stocks', $detail->quantity);
+                    ActivityLogger::withoutLogging(fn () => $detail->productVariant->increment('current_stocks', $detail->quantity));
                 }
             }
 

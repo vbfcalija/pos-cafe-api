@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use App\Traits\UsesUuid;
 use Database\Factories\UserFactory;
 use EloquentFilter\Filterable;
@@ -14,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use Filterable, HasApiTokens, HasFactory, Notifiable, UsesUuid;
+    use Filterable, HasApiTokens, HasFactory, LogsActivity, Notifiable, UsesUuid;
 
     protected $fillable = [
         'uuid',
@@ -52,5 +53,10 @@ class User extends Authenticatable
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return trim("{$this->firstname} {$this->lastname}") ?: (string) $this->email;
     }
 }

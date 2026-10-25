@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Interface\Repository\ActivityLogRepositoryInterface;
 use App\Interface\Repository\BranchRepositoryInterface;
 use App\Interface\Repository\CategoryRepositoryInterface;
 use App\Interface\Repository\ChecklistRepositoryInterface;
@@ -14,6 +15,7 @@ use App\Interface\Repository\ShiftRepositoryInterface;
 use App\Interface\Repository\TaskRepositoryInterface;
 use App\Interface\Repository\TaxRateRepositoryInterface;
 use App\Interface\Repository\UserRepositoryInterface;
+use App\Interface\Service\ActivityLogServiceInterface;
 use App\Interface\Service\AuthServiceInterface;
 use App\Interface\Service\BranchServiceInterface;
 use App\Interface\Service\CategoryServiceInterface;
@@ -27,6 +29,7 @@ use App\Interface\Service\ShiftServiceInterface;
 use App\Interface\Service\TaskServiceInterface;
 use App\Interface\Service\TaxRateServiceInterface;
 use App\Interface\Service\UserServiceInterface;
+use App\Repository\ActivityLogRepository;
 use App\Repository\BranchRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ChecklistRepository;
@@ -39,6 +42,7 @@ use App\Repository\ShiftRepository;
 use App\Repository\TaskRepository;
 use App\Repository\TaxRateRepository;
 use App\Repository\UserRepository;
+use App\Service\ActivityLogService;
 use App\Service\AuthService;
 use App\Service\BranchService;
 use App\Service\CategoryService;
@@ -99,5 +103,8 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->bind(ChecklistRepositoryInterface::class, ChecklistRepository::class);
         $this->app->bind(ChecklistServiceInterface::class, ChecklistService::class);
+
+        $this->app->bind(ActivityLogRepositoryInterface::class, ActivityLogRepository::class);
+        $this->app->bind(ActivityLogServiceInterface::class, ActivityLogService::class);
     }
 }

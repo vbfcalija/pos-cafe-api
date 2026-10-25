@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
@@ -53,4 +54,8 @@ Route::prefix('user')->group(function () {
     Route::post('checklists/{uuid}/users', [ChecklistController::class, 'addUser']);
     Route::put('checklists/{uuid}/users', [ChecklistController::class, 'syncUsers']);
     Route::delete('checklists/{uuid}/users/{checklistUserUuid}', [ChecklistController::class, 'removeUser']);
+
+    // Activity log: read-only.
+    Route::get('activity-logs', [ActivityLogController::class, 'index']);
+    Route::get('activity-logs/{uuid}', [ActivityLogController::class, 'show']);
 });
