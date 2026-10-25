@@ -4,44 +4,52 @@ namespace App\Providers;
 
 use App\Interface\Repository\BranchRepositoryInterface;
 use App\Interface\Repository\CategoryRepositoryInterface;
+use App\Interface\Repository\ChecklistRepositoryInterface;
 use App\Interface\Repository\CustomerRepositoryInterface;
 use App\Interface\Repository\DiscountRepositoryInterface;
 use App\Interface\Repository\OrderRepositoryInterface;
 use App\Interface\Repository\ProductRepositoryInterface;
 use App\Interface\Repository\ProductVariantRepositoryInterface;
 use App\Interface\Repository\ShiftRepositoryInterface;
+use App\Interface\Repository\TaskRepositoryInterface;
 use App\Interface\Repository\TaxRateRepositoryInterface;
 use App\Interface\Repository\UserRepositoryInterface;
 use App\Interface\Service\AuthServiceInterface;
 use App\Interface\Service\BranchServiceInterface;
 use App\Interface\Service\CategoryServiceInterface;
+use App\Interface\Service\ChecklistServiceInterface;
 use App\Interface\Service\CustomerServiceInterface;
 use App\Interface\Service\DiscountServiceInterface;
 use App\Interface\Service\OrderServiceInterface;
 use App\Interface\Service\ProductServiceInterface;
 use App\Interface\Service\ProductVariantServiceInterface;
 use App\Interface\Service\ShiftServiceInterface;
+use App\Interface\Service\TaskServiceInterface;
 use App\Interface\Service\TaxRateServiceInterface;
 use App\Interface\Service\UserServiceInterface;
 use App\Repository\BranchRepository;
 use App\Repository\CategoryRepository;
+use App\Repository\ChecklistRepository;
 use App\Repository\CustomerRepository;
 use App\Repository\DiscountRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ProductVariantRepository;
 use App\Repository\ShiftRepository;
+use App\Repository\TaskRepository;
 use App\Repository\TaxRateRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthService;
 use App\Service\BranchService;
 use App\Service\CategoryService;
+use App\Service\ChecklistService;
 use App\Service\CustomerService;
 use App\Service\DiscountService;
 use App\Service\OrderService;
 use App\Service\ProductService;
 use App\Service\ProductVariantService;
 use App\Service\ShiftService;
+use App\Service\TaskService;
 use App\Service\TaxRateService;
 use App\Service\UserService;
 use Illuminate\Support\ServiceProvider;
@@ -85,5 +93,11 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
         $this->app->bind(OrderServiceInterface::class, OrderService::class);
+
+        $this->app->bind(TaskRepositoryInterface::class, TaskRepository::class);
+        $this->app->bind(TaskServiceInterface::class, TaskService::class);
+
+        $this->app->bind(ChecklistRepositoryInterface::class, ChecklistRepository::class);
+        $this->app->bind(ChecklistServiceInterface::class, ChecklistService::class);
     }
 }

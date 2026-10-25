@@ -35,4 +35,9 @@ class Branch extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class);
+    }
 }
