@@ -7,7 +7,9 @@ use App\Interface\Repository\BranchRepositoryInterface;
 use App\Interface\Repository\CategoryRepositoryInterface;
 use App\Interface\Repository\ChecklistRepositoryInterface;
 use App\Interface\Repository\CustomerRepositoryInterface;
+use App\Interface\Repository\DailyInventoryRepositoryInterface;
 use App\Interface\Repository\DiscountRepositoryInterface;
+use App\Interface\Repository\InventoryItemRepositoryInterface;
 use App\Interface\Repository\OrderRepositoryInterface;
 use App\Interface\Repository\ProductRepositoryInterface;
 use App\Interface\Repository\ProductVariantRepositoryInterface;
@@ -21,7 +23,9 @@ use App\Interface\Service\BranchServiceInterface;
 use App\Interface\Service\CategoryServiceInterface;
 use App\Interface\Service\ChecklistServiceInterface;
 use App\Interface\Service\CustomerServiceInterface;
+use App\Interface\Service\DailyInventoryServiceInterface;
 use App\Interface\Service\DiscountServiceInterface;
+use App\Interface\Service\InventoryItemServiceInterface;
 use App\Interface\Service\OrderServiceInterface;
 use App\Interface\Service\ProductServiceInterface;
 use App\Interface\Service\ProductVariantServiceInterface;
@@ -34,7 +38,9 @@ use App\Repository\BranchRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ChecklistRepository;
 use App\Repository\CustomerRepository;
+use App\Repository\DailyInventoryRepository;
 use App\Repository\DiscountRepository;
+use App\Repository\InventoryItemRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\ProductVariantRepository;
@@ -48,7 +54,9 @@ use App\Service\BranchService;
 use App\Service\CategoryService;
 use App\Service\ChecklistService;
 use App\Service\CustomerService;
+use App\Service\DailyInventoryService;
 use App\Service\DiscountService;
+use App\Service\InventoryItemService;
 use App\Service\OrderService;
 use App\Service\ProductService;
 use App\Service\ProductVariantService;
@@ -106,5 +114,11 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->bind(ActivityLogRepositoryInterface::class, ActivityLogRepository::class);
         $this->app->bind(ActivityLogServiceInterface::class, ActivityLogService::class);
+
+        $this->app->bind(InventoryItemRepositoryInterface::class, InventoryItemRepository::class);
+        $this->app->bind(InventoryItemServiceInterface::class, InventoryItemService::class);
+
+        $this->app->bind(DailyInventoryRepositoryInterface::class, DailyInventoryRepository::class);
+        $this->app->bind(DailyInventoryServiceInterface::class, DailyInventoryService::class);
     }
 }

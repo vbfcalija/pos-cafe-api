@@ -41,4 +41,9 @@ class Branch extends Model
     {
         return $this->hasMany(Checklist::class);
     }
+
+    public function dailyInventories(): HasMany
+    {
+        return $this->hasMany(DailyInventory::class);
+    }
 }

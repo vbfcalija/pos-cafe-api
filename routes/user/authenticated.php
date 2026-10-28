@@ -6,7 +6,9 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DailyInventoryController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariantController;
@@ -30,6 +32,7 @@ Route::prefix('user')->group(function () {
         'product-variants' => ProductVariantController::class,
         'users' => UserController::class,
         'tasks' => TaskController::class,
+        'inventory-items' => InventoryItemController::class,
     ]);
 
     // Orders support index/show/store only — no update/destroy. A recorded
@@ -58,4 +61,15 @@ Route::prefix('user')->group(function () {
     // Activity log: read-only.
     Route::get('activity-logs', [ActivityLogController::class, 'index']);
     Route::get('activity-logs/{uuid}', [ActivityLogController::class, 'show']);
+
+    // Daily inventory: POST generates (or returns) a branch's sheet for a day.
+    // No delete — a day's count is kept. Only "Other" lines can be removed.
+    Route::get('daily-inventories', [DailyInventoryController::class, 'index']);
+    Route::post('daily-inventories', [DailyInventoryController::class, 'store']);
+    Route::get('daily-inventories/{uuid}', [DailyInventoryController::class, 'show']);
+    Route::patch('daily-inventories/{uuid}', [DailyInventoryController::class, 'update']);
+    Route::post('daily-inventories/{uuid}/counts', [DailyInventoryController::class, 'addOtherCount']);
+    Route::patch('daily-inventories/{uuid}/counts/{countUuid}', [DailyInventoryController::class, 'updateCount']);
+    Route::delete('daily-inventories/{uuid}/counts/{countUuid}', [DailyInventoryController::class, 'removeOtherCount']);
+    Route::put('daily-inventories/{uuid}/users', [DailyInventoryController::class, 'syncUsers']);
 });
