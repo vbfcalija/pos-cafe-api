@@ -17,6 +17,10 @@ class InventoryCountResource extends JsonResource
             'begin' => $this->begin === null ? null : (float) $this->begin,
             'ending' => $this->ending === null ? null : (float) $this->ending,
             'remarks' => $this->remarks,
+            // The item's current low-stock level, for flagging on the sheet.
+            'low_stock_threshold' => $this->relationLoaded('inventoryItem') && $this->inventoryItem?->low_stock_threshold !== null
+                ? (float) $this->inventoryItem->low_stock_threshold
+                : null,
         ];
     }
 }

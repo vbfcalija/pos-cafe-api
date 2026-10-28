@@ -126,7 +126,10 @@ class ChecklistService implements ChecklistServiceInterface
             return $this->lockedResponse();
         }
 
-        $userIds = User::whereIn('uuid', $payload->user_uuids ?? [])->pluck('id')->all();
+        // Keep the order people were picked in (whereIn returns database order).
+        $uuids = $payload->user_uuids ?? [];
+        $idsByUuid = User::whereIn('uuid', $uuids)->pluck('id', 'uuid');
+        $userIds = collect($uuids)->map(fn ($uuid) => $idsByUuid[$uuid] ?? null)->filter()->values()->all();
         $this->checklistRepository->syncUsers($checklist, $payload->type, $userIds);
 
         return new ChecklistResource($this->checklistRepository->findByUuid($uuid));

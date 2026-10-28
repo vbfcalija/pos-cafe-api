@@ -135,7 +135,10 @@ class DailyInventoryService implements DailyInventoryServiceInterface
             return $this->lockedResponse();
         }
 
-        $userIds = User::whereIn('uuid', $payload->user_uuids ?? [])->pluck('id')->all();
+        // Keep the order people were picked in (whereIn returns database order).
+        $uuids = $payload->user_uuids ?? [];
+        $idsByUuid = User::whereIn('uuid', $uuids)->pluck('id', 'uuid');
+        $userIds = collect($uuids)->map(fn ($uuid) => $idsByUuid[$uuid] ?? null)->filter()->values()->all();
         $this->dailyInventoryRepository->syncUsers($sheet, $userIds);
 
         return $this->fresh($uuid);

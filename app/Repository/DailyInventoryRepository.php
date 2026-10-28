@@ -23,6 +23,7 @@ class DailyInventoryRepository implements DailyInventoryRepositoryInterface
         return [
             'branch',
             'counts' => fn ($query) => $query->orderByRaw('inventory_item_id IS NULL')->orderBy('id'),
+            'counts.inventoryItem',
             'dailyInventoryUsers' => fn ($query) => $query->orderBy('id'),
             'dailyInventoryUsers.user',
         ];

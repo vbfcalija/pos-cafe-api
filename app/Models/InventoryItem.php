@@ -17,10 +17,12 @@ class InventoryItem extends Model
         'uuid',
         'name',
         'unit',
+        'low_stock_threshold',
         'is_active',
     ];
 
     protected $casts = [
+        'low_stock_threshold' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 

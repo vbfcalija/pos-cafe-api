@@ -27,6 +27,7 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
         $item = new InventoryItem;
         $item->name = $payload->name;
         $item->unit = $payload->unit;
+        $item->low_stock_threshold = $this->threshold($payload->low_stock_threshold);
         $item->is_active = $payload->is_active ?? true;
         $item->save();
 
@@ -38,10 +39,21 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
         $item = InventoryItem::where('uuid', $uuid)->firstOrFail();
         $item->name = $payload->name ?? $item->name;
         $item->unit = $payload->unit ?? $item->unit;
+
+        // has() rather than ??, so the level can be cleared by sending it empty.
+        if ($payload->has('low_stock_threshold')) {
+            $item->low_stock_threshold = $this->threshold($payload->low_stock_threshold);
+        }
+
         $item->is_active = $payload->is_active ?? $item->is_active;
         $item->save();
 
         return $item->fresh();
+    }
+
+    private function threshold($value)
+    {
+        return $value === null || $value === '' ? null : $value;
     }
 
     public function delete(string $uuid)

@@ -26,6 +26,7 @@ use App\Interface\Service\CustomerServiceInterface;
 use App\Interface\Service\DailyInventoryServiceInterface;
 use App\Interface\Service\DiscountServiceInterface;
 use App\Interface\Service\InventoryItemServiceInterface;
+use App\Interface\Service\InventorySummaryServiceInterface;
 use App\Interface\Service\OrderServiceInterface;
 use App\Interface\Service\ProductServiceInterface;
 use App\Interface\Service\ProductVariantServiceInterface;
@@ -57,6 +58,7 @@ use App\Service\CustomerService;
 use App\Service\DailyInventoryService;
 use App\Service\DiscountService;
 use App\Service\InventoryItemService;
+use App\Service\InventorySummaryService;
 use App\Service\OrderService;
 use App\Service\ProductService;
 use App\Service\ProductVariantService;
@@ -120,5 +122,7 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->bind(DailyInventoryRepositoryInterface::class, DailyInventoryRepository::class);
         $this->app->bind(DailyInventoryServiceInterface::class, DailyInventoryService::class);
+
+        $this->app->bind(InventorySummaryServiceInterface::class, InventorySummaryService::class);
     }
 }

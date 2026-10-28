@@ -9,6 +9,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DailyInventoryController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\InventoryItemController;
+use App\Http\Controllers\InventorySummaryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductVariantController;
@@ -72,4 +73,7 @@ Route::prefix('user')->group(function () {
     Route::patch('daily-inventories/{uuid}/counts/{countUuid}', [DailyInventoryController::class, 'updateCount']);
     Route::delete('daily-inventories/{uuid}/counts/{countUuid}', [DailyInventoryController::class, 'removeOtherCount']);
     Route::put('daily-inventories/{uuid}/users', [DailyInventoryController::class, 'syncUsers']);
+
+    // What needs restocking, from the latest counts (used on the Overview).
+    Route::get('inventory-summary', [InventorySummaryController::class, 'index']);
 });
