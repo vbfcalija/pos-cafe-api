@@ -16,12 +16,16 @@
         .row .right { text-align: right; }
         hr { border: none; border-top: 1px dashed #000; margin: 4px 0; }
         .item { margin-bottom: 2px; }
+        .refunded-banner { margin-top: 4px; padding: 2px 0; border: 1px solid #000; text-align: center; font-size: 11px; font-weight: bold; letter-spacing: 1px; }
     </style>
 </head>
 <body>
     <p class="center bold">{{ $appName }}</p>
     @if ($branchName)
         <p class="center">{{ $branchName }}</p>
+    @endif
+    @if ($isRefunded)
+        <p class="refunded-banner">REFUNDED</p>
     @endif
     <hr>
     <p>Order #: {{ $order->order_no }}</p>
@@ -53,6 +57,14 @@
     <table class="row bold"><tr><td>TOTAL</td><td class="right">{{ number_format($grandTotal, 2) }}</td></tr></table>
     <hr>
     <p>Payment: {{ $paymentMethods }}</p>
+    @if ($isRefunded)
+        <hr>
+        <table class="row bold"><tr><td>REFUNDED</td><td class="right">-{{ number_format($grandTotal, 2) }}</td></tr></table>
+        <p>Refunded: {{ $refundedAt }}</p>
+        @if ($refundedBy)
+            <p>Refunded by: {{ $refundedBy }}</p>
+        @endif
+    @endif
     <p>&nbsp;</p>
     <p class="center bold">Thank you!</p>
     <p class="center">Please come again.</p>

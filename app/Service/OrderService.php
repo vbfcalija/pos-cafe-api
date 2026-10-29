@@ -299,6 +299,7 @@ class OrderService implements OrderServiceInterface
         return
             '[C]<b>' . config('app.name') . "</b>\n" .
             ($branch ? "[C]{$branch->name}\n" : '') .
+            ($order->refunded_at ? "[C]<b>*** REFUNDED ***</b>\n" : '') .
             "[C]================================\n" .
             "[L]Order #: {$order->order_no}\n" .
             "[L]Date: {$order->created_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')}\n" .
@@ -313,6 +314,10 @@ class OrderService implements OrderServiceInterface
             '[L]<b>TOTAL[R]' . number_format($grandTotal, 2) . "</b>\n" .
             "[C]--------------------------------\n" .
             "[L]Payment: {$paymentMethods}\n" .
+            ($order->refunded_at
+                ? '[L]<b>REFUNDED[R]-' . number_format($grandTotal, 2) . "</b>\n" .
+                  "[L]Refunded: {$order->refunded_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')}\n"
+                : '') .
             "[C]\n" .
             "[C]<b>Thank you!</b>\n" .
             "[C]Please come again.\n" .
@@ -373,6 +378,11 @@ class OrderService implements OrderServiceInterface
             'taxTotal' => $taxTotal,
             'grandTotal' => $subtotal + $taxTotal,
             'paymentMethods' => $order->payments->pluck('payment_method.value')->unique()->implode(', '),
+            // A refunded order's receipt must say so — otherwise a reprint
+            // looks exactly like proof of a valid sale.
+            'isRefunded' => (bool) $order->refunded_at,
+            'refundedAt' => $order->refunded_at?->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i'),
+            'refundedBy' => $order->refundedBy ? trim("{$order->refundedBy->firstname} {$order->refundedBy->lastname}") : null,
         ];
     }
 
@@ -406,6 +416,11 @@ class OrderService implements OrderServiceInterface
         if ($data['branchName']) {
             $out .= $data['branchName'] . "\n";
         }
+        if ($data['isRefunded']) {
+            $doubleSize = $esc . '!' . "\x30";
+            $normalSize = $esc . '!' . "\x00";
+            $out .= "\n" . $boldOn . $doubleSize . "REFUNDED\n" . $normalSize . $boldOff;
+        }
         $out .= $alignLeft;
         $out .= str_repeat('-', $width) . "\n";
         $out .= 'Order #: ' . $data['order']->order_no . "\n";
@@ -434,6 +449,14 @@ class OrderService implements OrderServiceInterface
         $out .= $boldOn . $lr('TOTAL', number_format($data['grandTotal'], 2)) . "\n" . $boldOff;
         $out .= str_repeat('-', $width) . "\n";
         $out .= 'Payment: ' . $data['paymentMethods'] . "\n";
+        if ($data['isRefunded']) {
+            $out .= str_repeat('-', $width) . "\n";
+            $out .= $boldOn . $lr('REFUNDED', '-' . number_format($data['grandTotal'], 2)) . "\n" . $boldOff;
+            $out .= 'Refunded: ' . $data['refundedAt'] . "\n";
+            if ($data['refundedBy']) {
+                $out .= 'Refunded by: ' . $data['refundedBy'] . "\n";
+            }
+        }
         $out .= "\n";
         $out .= $alignCenter;
         $out .= "Thank you!\n";
