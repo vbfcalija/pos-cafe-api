@@ -23,6 +23,14 @@ class OrderService implements OrderServiceInterface
 {
     use SortingTraits;
 
+    // Printed on every receipt: it is a request for payment, not a BIR sales
+    // invoice. The client preview (receipt-preview-modal.vue) repeats this text.
+    private const RECEIPT_DISCLAIMER = [
+        'THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX',
+        'This is a request for payment. This is not a Sales Invoice.',
+        'Please ask for your Sales Invoice.',
+    ];
+
     private $orderRepository;
 
     public function __construct(OrderRepositoryInterface $orderRepository)
@@ -318,6 +326,8 @@ class OrderService implements OrderServiceInterface
                 ? '[L]<b>REFUNDED[R]-' . number_format($grandTotal, 2) . "</b>\n" .
                   "[L]Refunded: {$order->refunded_at->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i')}\n"
                 : '') .
+            "[C]--------------------------------\n" .
+            $this->receiptDisclaimerTags() .
             "[C]\n" .
             "[C]<b>Thank you!</b>\n" .
             "[C]Please come again.\n" .
@@ -383,7 +393,23 @@ class OrderService implements OrderServiceInterface
             'isRefunded' => (bool) $order->refunded_at,
             'refundedAt' => $order->refunded_at?->copy()->timezone(config('app.business_timezone'))->format('Y-m-d H:i'),
             'refundedBy' => $order->refundedBy ? trim("{$order->refundedBy->firstname} {$order->refundedBy->lastname}") : null,
+            'disclaimer' => self::RECEIPT_DISCLAIMER,
         ];
+    }
+
+    private function receiptDisclaimerTags(): string
+    {
+        $out = '';
+        foreach (self::RECEIPT_DISCLAIMER as $i => $text) {
+            if ($i > 0) {
+                $out .= "[C]\n";
+            }
+            foreach (explode("\n", wordwrap($text, 32, "\n", true)) as $line) {
+                $out .= "[C]{$line}\n";
+            }
+        }
+
+        return $out;
     }
 
     /**
@@ -457,8 +483,15 @@ class OrderService implements OrderServiceInterface
                 $out .= 'Refunded by: ' . $data['refundedBy'] . "\n";
             }
         }
-        $out .= "\n";
+        $out .= str_repeat('-', $width) . "\n";
         $out .= $alignCenter;
+        foreach ($data['disclaimer'] as $i => $text) {
+            if ($i > 0) {
+                $out .= "\n";
+            }
+            $out .= wordwrap($text, $width, "\n", true) . "\n";
+        }
+        $out .= "\n";
         $out .= "Thank you!\n";
         $out .= "Please come again.\n";
         $out .= $alignLeft;

@@ -65,6 +65,13 @@
             <p>Refunded by: {{ $refundedBy }}</p>
         @endif
     @endif
+    <hr>
+    @foreach ($disclaimer as $line)
+        @if (! $loop->first)
+            <p>&nbsp;</p>
+        @endif
+        <p class="center">{{ $line }}</p>
+    @endforeach
     <p>&nbsp;</p>
     <p class="center bold">Thank you!</p>
     <p class="center">Please come again.</p>
