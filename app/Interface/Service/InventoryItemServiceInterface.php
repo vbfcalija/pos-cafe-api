@@ -12,5 +12,7 @@ interface InventoryItemServiceInterface
 
     public function updateInventoryItem(object $payload, string $uuid);
 
+    public function reorderInventoryItems(object $payload);
+
     public function deleteInventoryItem(string $uuid);
 }

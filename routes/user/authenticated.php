@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/logout', [AuthController::class, 'logout']);
 
 Route::prefix('user')->group(function () {
+    // Declared before the resource so "reorder" isn't read as an item uuid.
+    Route::put('inventory-items/reorder', [InventoryItemController::class, 'reorder']);
+
     Route::apiResources([
         'branches' => BranchController::class,
         'customers' => CustomerController::class,

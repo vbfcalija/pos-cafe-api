@@ -20,7 +20,7 @@ class InventoryItemService implements InventoryItemServiceInterface
 
     public function findInventoryItems(object $payload)
     {
-        $sortField = $this->sortField($payload, 'id');
+        $sortField = $this->sortField($payload, 'sort_order');
         $sortOrder = $this->sortOrder($payload, 'asc');
 
         return InventoryItemResource::collection(
@@ -41,6 +41,15 @@ class InventoryItemService implements InventoryItemServiceInterface
     public function updateInventoryItem(object $payload, string $uuid)
     {
         return new InventoryItemResource($this->inventoryItemRepository->update($payload, $uuid));
+    }
+
+    public function reorderInventoryItems(object $payload)
+    {
+        $this->inventoryItemRepository->reorder($payload->uuids);
+
+        return response()->json([
+            'message' => 'Success.',
+        ], 200);
     }
 
     public function deleteInventoryItem(string $uuid)

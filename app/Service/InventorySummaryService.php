@@ -35,7 +35,7 @@ class InventorySummaryService implements InventorySummaryServiceInterface
             ->orderBy('name')
             ->get();
 
-        $items = InventoryItem::where('is_active', true)->orderBy('id')->get();
+        $items = InventoryItem::where('is_active', true)->orderBy('sort_order')->orderBy('id')->get();
 
         return response()->json([
             'data' => [

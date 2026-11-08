@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InventoryItem\ReorderInventoryItemsRequest;
 use App\Http\Requests\InventoryItem\StoreInventoryItemRequest;
 use App\Http\Requests\InventoryItem\UpdateInventoryItemRequest;
 use App\Interface\Service\InventoryItemServiceInterface;
@@ -34,6 +35,11 @@ class InventoryItemController extends Controller
     public function update(UpdateInventoryItemRequest $request, string $uuid)
     {
         return $this->inventoryItemService->updateInventoryItem($request, $uuid);
+    }
+
+    public function reorder(ReorderInventoryItemsRequest $request)
+    {
+        return $this->inventoryItemService->reorderInventoryItems($request);
     }
 
     public function destroy(string $uuid)

@@ -14,6 +14,7 @@ class InventoryItemResource extends JsonResource
             'name' => $this->name,
             'unit' => $this->unit,
             'low_stock_threshold' => $this->low_stock_threshold === null ? null : (float) $this->low_stock_threshold,
+            'sort_order' => $this->sort_order,
             'is_active' => $this->is_active,
         ];
     }

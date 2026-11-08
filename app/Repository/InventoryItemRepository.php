@@ -4,6 +4,8 @@ namespace App\Repository;
 
 use App\Interface\Repository\InventoryItemRepositoryInterface;
 use App\Models\InventoryItem;
+use App\Support\ActivityLogger;
+use Illuminate\Support\Facades\DB;
 
 class InventoryItemRepository implements InventoryItemRepositoryInterface
 {
@@ -28,6 +30,7 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
         $item->name = $payload->name;
         $item->unit = $payload->unit;
         $item->low_stock_threshold = $this->threshold($payload->low_stock_threshold);
+        $item->sort_order = (int) InventoryItem::max('sort_order') + 1; // new items go last; reordering is done through reorder()
         $item->is_active = $payload->is_active ?? true;
         $item->save();
 
@@ -54,6 +57,23 @@ class InventoryItemRepository implements InventoryItemRepositoryInterface
     private function threshold($value)
     {
         return $value === null || $value === '' ? null : $value;
+    }
+
+    /**
+     * Numbers the items 1..n in the order given. One activity entry covers
+     * the whole move instead of a log line per item.
+     */
+    public function reorder(array $uuids)
+    {
+        DB::transaction(function () use ($uuids) {
+            foreach (array_values($uuids) as $index => $uuid) {
+                InventoryItem::where('uuid', $uuid)->update(['sort_order' => $index + 1]);
+            }
+        });
+
+        ActivityLogger::log('updated', 'Reordered inventory items', null, [
+            'attributes' => ['count' => count($uuids)],
+        ]);
     }
 
     public function delete(string $uuid)

@@ -18,11 +18,13 @@ class InventoryItem extends Model
         'name',
         'unit',
         'low_stock_threshold',
+        'sort_order',
         'is_active',
     ];
 
     protected $casts = [
         'low_stock_threshold' => 'decimal:2',
+        'sort_order' => 'integer',
         'is_active' => 'boolean',
     ];
 

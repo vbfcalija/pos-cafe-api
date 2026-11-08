@@ -15,14 +15,18 @@ use Illuminate\Support\Facades\DB;
 class DailyInventoryRepository implements DailyInventoryRepositoryInterface
 {
     /**
-     * Lines in sheet order (item lines by creation, "Other" lines after
-     * them), counters in the order they were added.
+     * Lines in sheet order (item lines by the item's sort order, "Other"
+     * lines after them), counters in the order they were added. The order is
+     * read from the item, so reordering items also reorders pending sheets.
      */
     private function relations(): array
     {
         return [
             'branch',
-            'counts' => fn ($query) => $query->orderByRaw('inventory_item_id IS NULL')->orderBy('id'),
+            'counts' => fn ($query) => $query
+                ->orderByRaw('inventory_item_id IS NULL')
+                ->orderBy(InventoryItem::select('sort_order')->whereColumn('inventory_items.id', 'inventory_counts.inventory_item_id'))
+                ->orderBy('id'),
             'counts.inventoryItem',
             'dailyInventoryUsers' => fn ($query) => $query->orderBy('id'),
             'dailyInventoryUsers.user',
@@ -78,6 +82,7 @@ class DailyInventoryRepository implements DailyInventoryRepositoryInterface
 
             InventoryItem::where('is_active', true)
                 ->whereNotIn('id', $existing)
+                ->orderBy('sort_order')
                 ->orderBy('id')
                 ->each(function (InventoryItem $item) use ($sheet, $previousEndings) {
                     $sheet->counts()->create([
